@@ -337,14 +337,39 @@ main {
   color: var(--red-dark);
 }
 
+.featured-carousel {
+  position: relative;
+}
+
 .horizontal-rail {
   display: grid;
   gap: 18px;
-  grid-auto-columns: minmax(260px, 350px);
-  grid-auto-flow: column;
-  overflow-x: auto;
-  padding: 4px 2px 16px;
-  scroll-snap-type: x mandatory;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: visible;
+  padding: 4px 0 8px;
+}
+
+.featured-arrow {
+  background: rgba(5, 5, 5, 0.88);
+  border-color: rgba(231, 201, 95, 0.42);
+  color: var(--gold);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+}
+
+.featured-prev {
+  left: -56px;
+}
+
+.featured-next {
+  right: -56px;
+}
+
+.featured-arrow[disabled] {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 .vehicle-card {
@@ -366,6 +391,19 @@ main {
 .card-media img {
   height: 100%;
   object-fit: cover;
+}
+
+.card-media-link {
+  display: block;
+  height: 100%;
+}
+
+.card-media-link img {
+  transition: transform 0.35s ease;
+}
+
+.vehicle-card:hover .card-media-link img {
+  transform: scale(1.035);
 }
 
 .card-media button {
@@ -1230,6 +1268,10 @@ textarea {
 }
 
 @media (max-width: 1040px) {
+  .horizontal-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .vehicle-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1278,6 +1320,14 @@ textarea {
 
   .hero-arrow {
     display: none;
+  }
+
+  .featured-prev {
+    left: -18px;
+  }
+
+  .featured-next {
+    right: -18px;
   }
 
   .section-head,
@@ -1350,6 +1400,7 @@ textarea {
   }
 
   .vehicle-grid,
+  .horizontal-rail,
   .vehicle-form,
   .split-fields,
   .admin-row {
@@ -1374,5 +1425,540 @@ textarea {
 
   .admin-row img {
     width: 100%;
+  }
+}
+
+/* Final black and gold lock: keeps the whole site in the logo palette. */
+html,
+body,
+main,
+.page,
+.section,
+.stock-preview,
+.page-stock,
+.page-about,
+.page-contact,
+.page-admin,
+.inventory-layout,
+.contact-layout,
+.admin-shell,
+.about-content,
+.testimonials {
+  background-color: #050505 !important;
+}
+
+body {
+  color: #f3d66b;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(231, 201, 95, 0.1), transparent 30rem),
+    radial-gradient(circle at 86% 34%, rgba(185, 137, 31, 0.08), transparent 22rem),
+    #050505 !important;
+}
+
+.site-header,
+.site-footer,
+.social-band {
+  background:
+    linear-gradient(135deg, rgba(231, 201, 95, 0.08), transparent),
+    #050505 !important;
+  border-color: rgba(231, 201, 95, 0.26) !important;
+}
+
+.vehicle-card,
+.filters,
+.contact-form,
+.contact-info,
+.login-panel form,
+.admin-panel,
+.testimonial-card,
+.differentials article,
+.admin-row,
+.optional-urls,
+.story-copy {
+  background:
+    linear-gradient(180deg, rgba(231, 201, 95, 0.045), rgba(0, 0, 0, 0)),
+    #0b0b0a !important;
+  border-color: rgba(231, 201, 95, 0.24) !important;
+  color: #f3d66b !important;
+}
+
+.story-band {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.18), #050505 54%),
+    #050505 !important;
+  border-color: rgba(231, 201, 95, 0.24) !important;
+}
+
+.card-media,
+.empty-state,
+.icon-button,
+.icon-button.muted,
+.pagination button,
+.button-outline,
+.upload-box,
+input,
+select,
+textarea {
+  background-color: #11100d !important;
+  border-color: rgba(231, 201, 95, 0.28) !important;
+  color: #f3d66b !important;
+}
+
+.card-media button,
+.hero-arrow {
+  background: rgba(5, 5, 5, 0.86) !important;
+  border-color: rgba(231, 201, 95, 0.34) !important;
+  color: #f3d66b !important;
+}
+
+.section-head h2,
+.hero-content h1,
+.page-hero h1,
+.story-copy h2,
+.prose h2,
+.social-band h2,
+.filter-title h2,
+.inventory-toolbar span,
+.contact-info h2,
+.contact-form h2,
+.login-panel h2,
+.admin-toolbar h2,
+.admin-intro h1,
+.card-body h3,
+.differentials h3,
+.admin-row h3,
+label,
+.form-label {
+  color: #f3d66b !important;
+}
+
+.hero-content p,
+.page-hero p,
+.story-copy p,
+.prose p,
+.admin-intro p,
+.testimonial-card p,
+.vehicle-meta,
+.inventory-toolbar small,
+.differentials p,
+.admin-row p,
+.form-note,
+.site-footer a,
+.site-footer span,
+.site-footer p,
+.upload-box small,
+.photo-upload-field small,
+.optional-urls small {
+  color: rgba(243, 214, 107, 0.72) !important;
+}
+
+.price,
+.eyebrow,
+.text-link,
+.text-button,
+.testimonial-card strong,
+.optional-urls summary,
+.site-nav a:hover,
+.contact-list svg,
+.footer-social svg,
+.differentials svg,
+.upload-box svg {
+  color: #e7c95f !important;
+}
+
+.button-dark,
+.button-light,
+.button-whatsapp,
+.nav-whatsapp,
+.floating-whatsapp,
+.pagination button.is-active {
+  background: linear-gradient(135deg, #f3d66b, #b9891f) !important;
+  border-color: rgba(243, 214, 107, 0.5) !important;
+  color: #050505 !important;
+}
+
+.button-outline:hover,
+.upload-box:hover,
+input:focus,
+select:focus,
+textarea:focus {
+  background-color: #17140d !important;
+  border-color: #e7c95f !important;
+  box-shadow: 0 0 0 3px rgba(231, 201, 95, 0.18) !important;
+}
+
+.vehicle-details-shell {
+  margin: 0 auto;
+  max-width: 1240px;
+  padding: 118px 22px 90px;
+}
+
+.details-top {
+  margin-bottom: 18px;
+}
+
+.vehicle-detail {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+}
+
+.details-gallery,
+.details-info,
+.details-empty {
+  background:
+    linear-gradient(180deg, rgba(231, 201, 95, 0.045), rgba(0, 0, 0, 0)),
+    #0b0b0a;
+  border: 1px solid rgba(231, 201, 95, 0.24);
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
+.details-gallery {
+  padding: 12px;
+}
+
+.details-main-media {
+  aspect-ratio: 16 / 10;
+  background: #050505;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.details-main-media img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-prev,
+.details-next {
+  background: rgba(5, 5, 5, 0.86) !important;
+  color: var(--gold) !important;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.details-prev {
+  left: 14px;
+}
+
+.details-next {
+  right: 14px;
+}
+
+.details-thumbs {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  margin-top: 12px;
+}
+
+.details-thumbs button {
+  aspect-ratio: 4 / 3;
+  background: #11100d;
+  border: 1px solid rgba(231, 201, 95, 0.18);
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+
+.details-thumbs button.is-active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(231, 201, 95, 0.18);
+}
+
+.details-thumbs img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-info {
+  align-self: start;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.details-info h1,
+.details-empty h1 {
+  color: #f3d66b;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1;
+  margin: 10px 0 12px;
+}
+
+.details-info p,
+.details-empty p {
+  color: rgba(243, 214, 107, 0.72);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.details-specs {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 22px 0;
+}
+
+.details-specs span {
+  align-items: center;
+  background: #11100d;
+  border: 1px solid rgba(231, 201, 95, 0.18);
+  border-radius: 8px;
+  color: #f3d66b;
+  display: flex;
+  gap: 9px;
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+.details-specs svg {
+  color: var(--gold);
+  height: 18px;
+  width: 18px;
+}
+
+.details-actions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 24px;
+}
+
+.details-empty {
+  padding: 32px;
+}
+
+@media (max-width: 900px) {
+  .vehicle-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .vehicle-details-shell {
+    padding: 94px 14px 70px;
+  }
+
+  .details-specs,
+  .details-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.has-whatsapp-panel {
+  overflow: hidden;
+}
+
+.whatsapp-panel[hidden] {
+  display: none;
+}
+
+.whatsapp-panel {
+  align-items: end;
+  display: grid;
+  inset: 0;
+  padding: 22px;
+  position: fixed;
+  z-index: 60;
+}
+
+.whatsapp-panel-backdrop {
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(8px);
+  inset: 0;
+  position: absolute;
+}
+
+.whatsapp-card {
+  background:
+    linear-gradient(180deg, rgba(231, 201, 95, 0.08), rgba(0, 0, 0, 0)),
+    #0b0b0a;
+  border: 1px solid rgba(231, 201, 95, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.58);
+  color: #f3d66b;
+  justify-self: end;
+  max-width: 420px;
+  padding: 24px;
+  position: relative;
+  width: min(100%, 420px);
+}
+
+.whatsapp-close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+}
+
+.whatsapp-card h2 {
+  color: #f3d66b;
+  font-size: 1.55rem;
+  margin: 8px 44px 8px 0;
+}
+
+.whatsapp-card p {
+  color: rgba(243, 214, 107, 0.72);
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+
+.attendant-list {
+  display: grid;
+  gap: 10px;
+}
+
+.attendant-option {
+  align-items: center;
+  background: #11100d;
+  border: 1px solid rgba(231, 201, 95, 0.24);
+  border-radius: 8px;
+  color: #f3d66b;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto 1fr auto;
+  min-height: 74px;
+  padding: 12px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.attendant-option:hover {
+  background: #17140d;
+  border-color: rgba(231, 201, 95, 0.72);
+  transform: translateY(-2px);
+}
+
+.attendant-icon {
+  align-items: center;
+  background: linear-gradient(135deg, #f3d66b, #b9891f);
+  border-radius: 8px;
+  color: #050505;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.attendant-option strong,
+.attendant-option small {
+  display: block;
+}
+
+.attendant-option small {
+  color: rgba(243, 214, 107, 0.7);
+  margin-top: 3px;
+}
+
+@media (max-width: 620px) {
+  .whatsapp-panel {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .whatsapp-card {
+    justify-self: stretch;
+    max-width: none;
+  }
+}
+
+.story-gallery {
+  align-self: center;
+  display: grid;
+  min-height: 560px;
+  padding: clamp(24px, 5vw, 64px);
+  position: relative;
+}
+
+.story-gallery::before {
+  background: radial-gradient(circle, rgba(231, 201, 95, 0.16), transparent 62%);
+  content: "";
+  filter: blur(18px);
+  inset: 12% 8% auto auto;
+  height: 220px;
+  pointer-events: none;
+  position: absolute;
+  width: 320px;
+}
+
+.story-photo {
+  border: 1px solid rgba(231, 201, 95, 0.28);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.48);
+  object-fit: cover;
+  position: relative;
+}
+
+.story-photo-main {
+  aspect-ratio: 16 / 11;
+  border-radius: 8px;
+  height: 100%;
+  max-height: 560px;
+}
+
+.story-photo-detail {
+  aspect-ratio: 9 / 16;
+  border-radius: 8px;
+  bottom: 34px;
+  max-width: min(34%, 230px);
+  position: absolute;
+  right: clamp(18px, 4vw, 54px);
+}
+
+.about-hero {
+  background-image: url("assets/store/fachada-noite-limpa.jpg") !important;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vehicle-card.reveal {
+  transition-delay: 0.05s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .story-gallery {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .story-photo-main {
+    max-height: none;
+  }
+
+  .story-photo-detail {
+    bottom: 0;
+    margin: -74px 18px 0 auto;
+    max-width: 42%;
+    position: relative;
+    right: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .story-photo-detail {
+    max-width: 52%;
   }
 }

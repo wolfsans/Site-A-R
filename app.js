@@ -1,7 +1,28 @@
+import { createClient } from "@supabase/supabase-js";
+
 const WHATSAPP_URL = "https://wa.me/5549999487011";
-const STORAGE_KEY = "aer_vehicles_v1";
-const ADMIN_KEY = "aer_admin_logged";
 const PAGE_SIZE = 6;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const STORAGE_BUCKET = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || "vehicle-photos";
+const supabase =
+  SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("SEU-PROJETO")
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+const WHATSAPP_ATTENDANTS = [
+  {
+    name: "Alan",
+    role: "Atendimento e consulta de veículos",
+    phone: "5549999487011",
+    icon: "user-round"
+  },
+  {
+    name: "João",
+    role: "Atendimento comercial",
+    phone: "5549920029932",
+    icon: "user-round"
+  }
+];
 
 function createId() {
   if (window.crypto?.randomUUID) {
@@ -180,12 +201,14 @@ const testimonials = [
   }
 ];
 
-let vehicles = loadVehicles();
+let vehicles = [];
 let currentPage = 1;
+let featuredPage = 0;
 let heroIndex = 0;
 let testimonialIndex = 0;
 let heroTimer;
 let editingVehicleId = null;
+let currentSession = null;
 
 const currency = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
@@ -195,31 +218,47 @@ const currency = new Intl.NumberFormat("pt-BR", {
 
 const kmFormat = new Intl.NumberFormat("pt-BR");
 
-function loadVehicles() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedVehicles));
-    return [...seedVehicles];
+async function loadVehicles() {
+  if (!supabase) {
+    vehicles = [...seedVehicles];
+    return vehicles;
   }
 
-  try {
-    const parsedVehicles = JSON.parse(stored);
-    const hasFordKa = parsedVehicles.some((vehicle) => vehicle.title === "Ford Ka Sedan 1.5" && vehicle.year === "2022");
-    if (!hasFordKa) {
-      const updatedVehicles = [seedVehicles[0], ...parsedVehicles];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedVehicles));
-      return updatedVehicles;
-    }
+  const { data, error } = await supabase
+    .from("vehicles")
+    .select("*, vehicle_images(id, image_url, sort_order)")
+    .order("created_at", { ascending: false });
 
-    return parsedVehicles;
-  } catch {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedVehicles));
-    return [...seedVehicles];
+  if (error) {
+    console.error("Erro ao carregar veículos:", error);
+    vehicles = [...seedVehicles];
+    return vehicles;
   }
+
+  vehicles = (data || []).map(mapVehicleFromDb);
+  return vehicles;
 }
 
-function saveVehicles() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
+function mapVehicleFromDb(row) {
+  const images = (row.vehicle_images || [])
+    .slice()
+    .sort((a, b) => Number(a.sort_order) - Number(b.sort_order))
+    .map((image) => image.image_url);
+
+  return {
+    id: String(row.id),
+    title: row.title,
+    brand: row.brand,
+    year: String(row.year),
+    km: Number(row.km || 0),
+    transmission: row.transmission,
+    fuel: row.fuel,
+    price: Number(row.price || 0),
+    featured: Boolean(row.featured),
+    sold: Boolean(row.sold),
+    description: row.description || "",
+    images: images.length ? images : ["assets/brand/aer-logo-transparent.png"]
+  };
 }
 
 function qs(selector, scope = document) {
@@ -243,9 +282,12 @@ function getMainYear(year) {
   return match ? Number(match[0]) : 0;
 }
 
-function vehicleWhatsApp(vehicle) {
-  const text = encodeURIComponent(`Olá, tenho interesse no veículo ${vehicle.title} ${vehicle.year}.`);
-  return `${WHATSAPP_URL}?text=${text}`;
+function vehicleWhatsAppMessage(vehicle) {
+  return `Olá, tenho interesse no veículo ${vehicle.title} ${vehicle.year}.`;
+}
+
+function whatsappLink(phone, message) {
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
 function renderIcons() {
@@ -275,7 +317,8 @@ function initNavigation() {
 }
 
 function showCurrentPage() {
-  const pageName = location.hash.replace("#", "") || "home";
+  const [pageNameRaw] = location.hash.replace("#", "").split("?");
+  const pageName = pageNameRaw || "home";
   qsa(".page").forEach((page) => {
     page.classList.toggle("is-active", page.dataset.page === pageName);
   });
@@ -291,6 +334,10 @@ function showCurrentPage() {
 
   if (pageName === "admin") {
     renderAdminState();
+  }
+
+  if (pageName === "detalhes") {
+    renderVehicleDetails();
   }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -359,16 +406,39 @@ function startHeroTimer() {
 function renderFeaturedRail() {
   const rail = qs("#featuredRail");
   const featured = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8);
-  rail.innerHTML = featured.map((vehicle) => vehicleCard(vehicle, false)).join("");
+  const perPage = getFeaturedPerPage();
+  const totalPages = Math.max(1, Math.ceil(featured.length / perPage));
+  featuredPage = Math.min(featuredPage, totalPages - 1);
+  const pageItems = featured.slice(featuredPage * perPage, featuredPage * perPage + perPage);
+
+  rail.innerHTML = pageItems.map((vehicle) => vehicleCard(vehicle, false)).join("");
+  qs("#featuredPrev").disabled = featuredPage === 0;
+  qs("#featuredNext").disabled = featuredPage >= totalPages - 1;
   bindCardCarousels(rail);
+  observeRevealElements(rail);
   renderIcons();
+}
+
+function getFeaturedPerPage() {
+  if (window.matchMedia("(max-width: 620px)").matches) return 1;
+  if (window.matchMedia("(max-width: 1040px)").matches) return 2;
+  return 4;
+}
+
+function moveFeatured(direction) {
+  const featuredCount = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8).length;
+  const totalPages = Math.max(1, Math.ceil(featuredCount / getFeaturedPerPage()));
+  featuredPage = Math.min(Math.max(featuredPage + direction, 0), totalPages - 1);
+  renderFeaturedRail();
 }
 
 function vehicleCard(vehicle, showDescription = true) {
   return `
-    <article class="vehicle-card" data-card-id="${vehicle.id}" data-image-index="0">
+    <article class="vehicle-card reveal" data-card-id="${vehicle.id}" data-image-index="0">
       <div class="card-media">
-        <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" />
+        <a class="card-media-link" href="#detalhes?id=${vehicle.id}" aria-label="Ver detalhes de ${vehicle.title}">
+          <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" />
+        </a>
         ${
           vehicle.images.length > 1
             ? `
@@ -393,8 +463,8 @@ function vehicleCard(vehicle, showDescription = true) {
         ${showDescription && vehicle.description ? `<p class="form-note">${vehicle.description}</p>` : ""}
         <strong class="price">${formatPrice(vehicle.price)}</strong>
         <div class="card-actions">
-          <a class="button button-outline" href="#contato">Ver detalhes</a>
-          <a class="button button-whatsapp" href="${vehicleWhatsApp(vehicle)}" target="_blank" rel="noopener">
+          <a class="button button-outline" href="#detalhes?id=${vehicle.id}">Ver detalhes</a>
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}">
             <i data-lucide="message-circle"></i>
             Consultar
           </a>
@@ -402,6 +472,109 @@ function vehicleCard(vehicle, showDescription = true) {
       </div>
     </article>
   `;
+}
+
+function getHashParam(name) {
+  const hashQuery = location.hash.split("?")[1] || "";
+  return new URLSearchParams(hashQuery).get(name);
+}
+
+function renderVehicleDetails() {
+  const id = getHashParam("id");
+  const vehicle = vehicles.find((item) => item.id === id && !item.sold);
+  const container = qs("#vehicleDetails");
+
+  if (!vehicle) {
+    container.innerHTML = `
+      <div class="details-empty">
+        <span class="eyebrow">Veículo</span>
+        <h1>Veículo não encontrado</h1>
+        <p>Esse veículo pode ter sido removido ou marcado como vendido.</p>
+        <a class="button button-light" href="#estoque">Voltar ao estoque</a>
+      </div>
+    `;
+    renderIcons();
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="details-top">
+      <a class="text-link" href="#estoque">Voltar ao estoque</a>
+    </div>
+    <article class="vehicle-detail reveal is-visible">
+      <div class="details-gallery" data-detail-gallery="${vehicle.id}" data-image-index="0">
+        <div class="details-main-media">
+          <img src="${vehicle.images[0]}" alt="${vehicle.title}" />
+          ${
+            vehicle.images.length > 1
+              ? `
+                <button class="icon-button details-prev" type="button" aria-label="Foto anterior" data-detail-prev>
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="icon-button details-next" type="button" aria-label="Próxima foto" data-detail-next>
+                  <i data-lucide="chevron-right"></i>
+                </button>
+              `
+              : ""
+          }
+        </div>
+        <div class="details-thumbs">
+          ${vehicle.images
+            .map(
+              (image, index) => `
+                <button class="${index === 0 ? "is-active" : ""}" type="button" data-detail-thumb="${index}" aria-label="Foto ${index + 1}">
+                  <img src="${image}" alt="${vehicle.title} foto ${index + 1}" loading="lazy" />
+                </button>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+      <div class="details-info">
+        <span class="eyebrow">${vehicle.brand}</span>
+        <h1>${vehicle.title}</h1>
+        <strong class="price">${formatPrice(vehicle.price)}</strong>
+        <div class="details-specs">
+          <span><i data-lucide="calendar"></i>${vehicle.year}</span>
+          <span><i data-lucide="gauge"></i>${formatKm(vehicle.km)}</span>
+          <span><i data-lucide="settings"></i>${vehicle.transmission}</span>
+          <span><i data-lucide="fuel"></i>${vehicle.fuel}</span>
+        </div>
+        <p>${vehicle.description || "Entre em contato para mais informações sobre este veículo."}</p>
+        <div class="details-actions">
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}">
+            <i data-lucide="message-circle"></i>
+            Consultar atendente
+          </a>
+          <a class="button button-outline" href="#estoque">Ver mais veículos</a>
+        </div>
+      </div>
+    </article>
+  `;
+
+  bindDetailsGallery(container, vehicle);
+  renderIcons();
+}
+
+function bindDetailsGallery(scope, vehicle) {
+  const gallery = qs("[data-detail-gallery]", scope);
+  if (!gallery) return;
+
+  const setImage = (index) => {
+    const next = (index + vehicle.images.length) % vehicle.images.length;
+    gallery.dataset.imageIndex = String(next);
+    qs(".details-main-media img", gallery).src = vehicle.images[next];
+    qsa("[data-detail-thumb]", gallery).forEach((thumb) => {
+      thumb.classList.toggle("is-active", Number(thumb.dataset.detailThumb) === next);
+    });
+  };
+
+  qsa("[data-detail-thumb]", gallery).forEach((thumb) => {
+    thumb.addEventListener("click", () => setImage(Number(thumb.dataset.detailThumb)));
+  });
+
+  qs("[data-detail-prev]", gallery)?.addEventListener("click", () => setImage(Number(gallery.dataset.imageIndex || 0) - 1));
+  qs("[data-detail-next]", gallery)?.addEventListener("click", () => setImage(Number(gallery.dataset.imageIndex || 0) + 1));
 }
 
 function bindCardCarousels(scope = document) {
@@ -513,6 +686,7 @@ function renderInventory() {
   });
 
   bindCardCarousels(qs("#vehicleGrid"));
+  observeRevealElements(qs("#vehicleGrid"));
   renderIcons();
 }
 
@@ -554,7 +728,7 @@ function initFilters() {
 }
 
 function renderAdminState() {
-  const logged = localStorage.getItem(ADMIN_KEY) === "true";
+  const logged = Boolean(currentSession);
   syncAdminAccess();
   qs("#loginPanel").hidden = logged;
   qs("#adminPanel").hidden = !logged;
@@ -564,7 +738,7 @@ function renderAdminState() {
 }
 
 function syncAdminAccess() {
-  const logged = localStorage.getItem(ADMIN_KEY) === "true";
+  const logged = Boolean(currentSession);
   const stockAdminButton = qs("#stockAdminButton");
   if (stockAdminButton) {
     stockAdminButton.hidden = !logged;
@@ -601,11 +775,10 @@ function renderAdminList() {
     : `<div class="empty-state">Nenhum veículo cadastrado.</div>`;
 
   qsa("[data-toggle-sold]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       const vehicle = vehicles.find((item) => item.id === button.dataset.toggleSold);
       if (!vehicle) return;
-      vehicle.sold = !vehicle.sold;
-      saveAndRefresh();
+      await updateVehicleSold(vehicle, !vehicle.sold);
     });
   });
 
@@ -616,24 +789,61 @@ function renderAdminList() {
   });
 
   qsa("[data-remove]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       if (editingVehicleId === button.dataset.remove) {
         resetVehicleForm();
       }
-      vehicles = vehicles.filter((item) => item.id !== button.dataset.remove);
-      saveAndRefresh();
+      await removeVehicle(button.dataset.remove);
     });
   });
 }
 
-function saveAndRefresh() {
-  saveVehicles();
+async function refreshVehicles() {
+  if (supabase) {
+    await loadVehicles();
+  }
   heroIndex = 0;
   currentPage = 1;
   renderHero();
   renderFeaturedRail();
   renderInventory();
-  renderAdminList();
+  if (currentSession) {
+    renderAdminList();
+  }
+}
+
+async function updateVehicleSold(vehicle, sold) {
+  if (!supabase) {
+    vehicle.sold = sold;
+    await refreshVehicles();
+    return;
+  }
+
+  const { error } = await supabase.from("vehicles").update({ sold }).eq("id", vehicle.id);
+  if (error) {
+    alert(`Não foi possível atualizar o veículo: ${error.message}`);
+    return;
+  }
+
+  await refreshVehicles();
+}
+
+async function removeVehicle(vehicleId) {
+  if (!confirm("Remover este veículo do estoque?")) return;
+
+  if (!supabase) {
+    vehicles = vehicles.filter((item) => item.id !== vehicleId);
+    await refreshVehicles();
+    return;
+  }
+
+  const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId);
+  if (error) {
+    alert(`Não foi possível remover o veículo: ${error.message}`);
+    return;
+  }
+
+  await refreshVehicles();
 }
 
 function compressImageFile(file, maxSize = 1280, quality = 0.78) {
@@ -651,7 +861,17 @@ function compressImageFile(file, maxSize = 1280, quality = 0.78) {
 
         const context = canvas.getContext("2d");
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Não foi possível processar uma das fotos."));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          quality
+        );
       };
       image.src = reader.result;
     };
@@ -668,6 +888,75 @@ async function getVehicleImages(form) {
   const files = form.getAll("photoFiles").filter((file) => file instanceof File && file.size > 0);
   const uploadedImages = await Promise.all(files.map((file) => compressImageFile(file)));
   return [...uploadedImages, ...urlImages];
+}
+
+async function uploadVehicleImages(files, vehicleId) {
+  if (!supabase || !files.length) return [];
+
+  const uploads = await Promise.all(
+    files.map(async (blob, index) => {
+      if (typeof blob === "string") return blob;
+
+      const filePath = `${vehicleId}/${Date.now()}-${index}.jpg`;
+      const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filePath, blob, {
+        contentType: "image/jpeg",
+        upsert: false
+      });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+      return data.publicUrl;
+    })
+  );
+
+  return uploads;
+}
+
+async function replaceVehicleImages(vehicleId, imageUrls) {
+  if (!supabase || !imageUrls.length) return;
+
+  const { error: deleteError } = await supabase.from("vehicle_images").delete().eq("vehicle_id", vehicleId);
+  if (deleteError) throw deleteError;
+
+  const rows = imageUrls.map((image_url, sort_order) => ({
+    vehicle_id: Number(vehicleId),
+    image_url,
+    sort_order
+  }));
+
+  const { error: insertError } = await supabase.from("vehicle_images").insert(rows);
+  if (insertError) throw insertError;
+}
+
+async function saveVehicleToSupabase(form, currentVehicle, rawImages) {
+  const payload = {
+    title: String(form.get("title")).trim(),
+    brand: String(form.get("brand")).trim(),
+    year: getMainYear(form.get("year")),
+    km: Number(form.get("km")),
+    transmission: String(form.get("transmission")),
+    fuel: String(form.get("fuel")).trim(),
+    price: Number(form.get("price") || 0),
+    featured: currentVehicle?.featured ?? true,
+    sold: currentVehicle?.sold || false,
+    description: String(form.get("description")).trim()
+  };
+
+  const query = currentVehicle
+    ? supabase.from("vehicles").update(payload).eq("id", currentVehicle.id).select("id").single()
+    : supabase.from("vehicles").insert(payload).select("id").single();
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const vehicleId = data.id;
+  if (rawImages.length) {
+    const imageUrls = await uploadVehicleImages(rawImages, vehicleId);
+    await replaceVehicleImages(vehicleId, imageUrls);
+  }
+
+  return vehicleId;
 }
 
 function renderSelectedPhotoPreview() {
@@ -719,31 +1008,40 @@ function startVehicleEdit(vehicleId) {
 }
 
 function initAdmin() {
-  qs("#loginForm").addEventListener("submit", (event) => {
+  qs("#loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const username = String(form.get("username")).trim();
-    const password = String(form.get("password")).trim();
-
-    if (username === "admin" && password === "aer2026") {
-      localStorage.setItem(ADMIN_KEY, "true");
-      event.currentTarget.reset();
-      renderAdminState();
+    if (!supabase) {
+      alert("Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para usar login real.");
       return;
     }
 
-    alert("Usuário ou senha inválidos.");
-  });
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email")).trim();
+    const password = String(form.get("password")).trim();
 
-  qs("#logoutButton").addEventListener("click", () => {
-    localStorage.removeItem(ADMIN_KEY);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert(`Login inválido: ${error.message}`);
+      return;
+    }
+
+    currentSession = data.session;
+    event.currentTarget.reset();
     renderAdminState();
   });
 
-  qs("#seedData").addEventListener("click", () => {
+  qs("#logoutButton").addEventListener("click", async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    currentSession = null;
+    renderAdminState();
+  });
+
+  qs("#seedData").addEventListener("click", async () => {
     resetVehicleForm();
-    vehicles = seedVehicles.map((vehicle) => ({ ...vehicle, id: createId() }));
-    saveAndRefresh();
+    await loadVehicles();
+    await refreshVehicles();
   });
 
   qs("#cancelEdit").addEventListener("click", resetVehicleForm);
@@ -760,29 +1058,37 @@ function initAdmin() {
       return;
     }
 
-    const vehiclePayload = {
-      id: currentVehicle?.id || createId(),
-      title: String(form.get("title")).trim(),
-      brand: String(form.get("brand")).trim(),
-      year: String(form.get("year")).trim(),
-      km: Number(form.get("km")),
-      transmission: String(form.get("transmission")),
-      fuel: String(form.get("fuel")).trim(),
-      price: Number(form.get("price")),
-      featured: currentVehicle?.featured ?? true,
-      sold: currentVehicle?.sold || false,
-      description: String(form.get("description")).trim(),
-      images: images.length ? images : currentVehicle.images
-    };
+    try {
+      if (supabase) {
+        await saveVehicleToSupabase(form, currentVehicle, images);
+      } else {
+        const vehiclePayload = {
+          id: currentVehicle?.id || createId(),
+          title: String(form.get("title")).trim(),
+          brand: String(form.get("brand")).trim(),
+          year: String(getMainYear(form.get("year"))),
+          km: Number(form.get("km")),
+          transmission: String(form.get("transmission")),
+          fuel: String(form.get("fuel")).trim(),
+          price: Number(form.get("price")),
+          featured: currentVehicle?.featured ?? true,
+          sold: currentVehicle?.sold || false,
+          description: String(form.get("description")).trim(),
+          images: images.length ? images.map((image) => (typeof image === "string" ? image : URL.createObjectURL(image))) : currentVehicle.images
+        };
 
-    if (currentVehicle) {
-      vehicles = vehicles.map((vehicle) => (vehicle.id === currentVehicle.id ? vehiclePayload : vehicle));
-    } else {
-      vehicles.unshift(vehiclePayload);
+        if (currentVehicle) {
+          vehicles = vehicles.map((vehicle) => (vehicle.id === currentVehicle.id ? vehiclePayload : vehicle));
+        } else {
+          vehicles.unshift(vehiclePayload);
+        }
+      }
+
+      resetVehicleForm();
+      await refreshVehicles();
+    } catch (error) {
+      alert(`Não foi possível salvar o veículo: ${error.message}`);
     }
-
-    resetVehicleForm();
-    saveAndRefresh();
   });
 }
 
@@ -793,12 +1099,106 @@ function initContactForm() {
     const name = String(form.get("name")).trim();
     const phone = String(form.get("phone")).trim();
     const message = String(form.get("message")).trim();
-    const text = encodeURIComponent(`Olá, sou ${name}. Meu telefone é ${phone}. ${message}`);
-    window.open(`${WHATSAPP_URL}?text=${text}`, "_blank", "noopener");
+    openWhatsAppPanel(`Olá, sou ${name}. Meu telefone é ${phone}. ${message}`);
   });
 }
 
-function init() {
+function openWhatsAppPanel(message = "Olá, gostaria de falar com a A&R Automóveis.") {
+  const panel = qs("#whatsappPanel");
+  const list = qs("#attendantList");
+  const baseMessage = message.trim() || "Olá, gostaria de falar com a A&R Automóveis.";
+
+  list.innerHTML = WHATSAPP_ATTENDANTS.map((attendant) => {
+    const fullMessage = `${baseMessage}\nSetor: ${attendant.name}`;
+    return `
+      <a class="attendant-option" href="${whatsappLink(attendant.phone, fullMessage)}" target="_blank" rel="noopener">
+        <span class="attendant-icon"><i data-lucide="${attendant.icon}"></i></span>
+        <span>
+          <strong>${attendant.name}</strong>
+          <small>${attendant.role}</small>
+        </span>
+        <i data-lucide="arrow-up-right"></i>
+      </a>
+    `;
+  }).join("");
+
+  panel.hidden = false;
+  document.body.classList.add("has-whatsapp-panel");
+  renderIcons();
+}
+
+function closeWhatsAppPanel() {
+  qs("#whatsappPanel").hidden = true;
+  document.body.classList.remove("has-whatsapp-panel");
+}
+
+function initWhatsAppPanel() {
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest(".js-whatsapp-select");
+    if (trigger) {
+      event.preventDefault();
+      openWhatsAppPanel(trigger.dataset.message);
+      return;
+    }
+
+    if (event.target.closest("[data-close-whatsapp]")) {
+      closeWhatsAppPanel();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !qs("#whatsappPanel").hidden) {
+      closeWhatsAppPanel();
+    }
+  });
+}
+
+async function initializeAuth() {
+  if (!supabase) {
+    currentSession = null;
+    return;
+  }
+
+  const { data } = await supabase.auth.getSession();
+  currentSession = data.session;
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentSession = session;
+    syncAdminAccess();
+    if (location.hash.replace("#", "").split("?")[0] === "admin") {
+      renderAdminState();
+    }
+  });
+}
+
+function observeRevealElements(scope = document) {
+  const elements = qsa(".reveal:not(.is-visible)", scope);
+  if (!elements.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    elements.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+
+  if (!window.revealObserver) {
+    window.revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          window.revealObserver.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }
+    );
+  }
+
+  elements.forEach((element) => window.revealObserver.observe(element));
+}
+
+async function init() {
+  await initializeAuth();
+  await loadVehicles();
   initNavigation();
   syncAdminAccess();
   renderHero();
@@ -808,6 +1208,8 @@ function init() {
   initFilters();
   initAdmin();
   initContactForm();
+  initWhatsAppPanel();
+  observeRevealElements();
 
   qs(".hero-prev").addEventListener("click", () => {
     moveHero(-1);
@@ -821,9 +1223,21 @@ function init() {
 
   qs("#testimonialPrev").addEventListener("click", () => moveTestimonial(-1));
   qs("#testimonialNext").addEventListener("click", () => moveTestimonial(1));
+  qs("#featuredPrev").addEventListener("click", () => moveFeatured(-1));
+  qs("#featuredNext").addEventListener("click", () => moveFeatured(1));
+  window.addEventListener("resize", () => renderFeaturedRail());
 
   startHeroTimer();
   renderIcons();
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  init().catch((error) => {
+    console.error("Erro ao iniciar o site:", error);
+    vehicles = [...seedVehicles];
+    renderHero();
+    renderFeaturedRail();
+    renderTestimonials();
+    renderInventory();
+  });
+});
