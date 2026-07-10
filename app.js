@@ -11,15 +11,19 @@ const supabase =
     : null;
 const WHATSAPP_ATTENDANTS = [
   {
+    id: "alan",
     name: "Alan",
     role: "Atendimento e consulta de veículos",
     phone: "5549999487011",
+    displayPhone: "(49) 99948-7011",
     icon: "user-round"
   },
   {
+    id: "joao",
     name: "João",
     role: "Atendimento comercial",
     phone: "5549920029932",
+    displayPhone: "(49) 92002-9932",
     icon: "user-round"
   }
 ];
@@ -464,7 +468,7 @@ function vehicleCard(vehicle, showDescription = true) {
         <strong class="price">${formatPrice(vehicle.price)}</strong>
         <div class="card-actions">
           <a class="button button-outline" href="#detalhes?id=${vehicle.id}">Ver detalhes</a>
-          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}">
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha Alan ou João para verificar disponibilidade, negociação e detalhes deste veículo.">
             <i data-lucide="message-circle"></i>
             Consultar
           </a>
@@ -542,7 +546,7 @@ function renderVehicleDetails() {
         </div>
         <p>${vehicle.description || "Entre em contato para mais informações sobre este veículo."}</p>
         <div class="details-actions">
-          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}">
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha Alan ou João para falar sobre este veículo.">
             <i data-lucide="message-circle"></i>
             Consultar atendente
           </a>
@@ -1099,23 +1103,41 @@ function initContactForm() {
     const name = String(form.get("name")).trim();
     const phone = String(form.get("phone")).trim();
     const message = String(form.get("message")).trim();
-    openWhatsAppPanel(`Olá, sou ${name}. Meu telefone é ${phone}. ${message}`);
+    openWhatsAppPanel({
+      message: `Olá, sou ${name}. Meu telefone é ${phone}. ${message}`,
+      title: "Enviar mensagem",
+      subtitle: "Escolha o vendedor que deve receber esta mensagem."
+    });
   });
 }
 
-function openWhatsAppPanel(message = "Olá, gostaria de falar com a A&R Automóveis.") {
+function openWhatsAppPanel(options = {}) {
+  const config = typeof options === "string" ? { message: options } : options;
   const panel = qs("#whatsappPanel");
   const list = qs("#attendantList");
-  const baseMessage = message.trim() || "Olá, gostaria de falar com a A&R Automóveis.";
+  const baseMessage = String(config.message || "").trim() || "Olá, gostaria de falar com a A&R Automóveis.";
+  const title = config.title || "Com quem deseja conversar?";
+  const subtitle = config.subtitle || "Escolha um atendente para iniciar a conversa pelo WhatsApp.";
+  const preferredAttendant = config.preferredAttendant || "";
+  const attendants = [...WHATSAPP_ATTENDANTS].sort((current, next) => {
+    if (!preferredAttendant) return 0;
+    return Number(next.id === preferredAttendant) - Number(current.id === preferredAttendant);
+  });
 
-  list.innerHTML = WHATSAPP_ATTENDANTS.map((attendant) => {
+  qs("#whatsappTitle").textContent = title;
+  qs("#whatsappDescription").textContent = subtitle;
+
+  list.innerHTML = attendants.map((attendant) => {
     const fullMessage = `${baseMessage}\nSetor: ${attendant.name}`;
+    const isPreferred = attendant.id === preferredAttendant;
     return `
       <a class="attendant-option" href="${whatsappLink(attendant.phone, fullMessage)}" target="_blank" rel="noopener">
         <span class="attendant-icon"><i data-lucide="${attendant.icon}"></i></span>
         <span>
           <strong>${attendant.name}</strong>
           <small>${attendant.role}</small>
+          <small>Telefone e WhatsApp: ${attendant.displayPhone}</small>
+          ${isPreferred ? `<em>Selecionado</em>` : ""}
         </span>
         <i data-lucide="arrow-up-right"></i>
       </a>
@@ -1137,7 +1159,12 @@ function initWhatsAppPanel() {
     const trigger = event.target.closest(".js-whatsapp-select");
     if (trigger) {
       event.preventDefault();
-      openWhatsAppPanel(trigger.dataset.message);
+      openWhatsAppPanel({
+        message: trigger.dataset.message,
+        title: trigger.dataset.whatsappTitle,
+        subtitle: trigger.dataset.whatsappSubtitle,
+        preferredAttendant: trigger.dataset.preferredAttendant
+      });
       return;
     }
 
