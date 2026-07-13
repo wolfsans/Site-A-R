@@ -38,6 +38,21 @@ a {
 }
 
 button,
+.button,
+.text-button,
+.icon-button,
+.site-nav a,
+.nav-whatsapp,
+.floating-whatsapp,
+.details-thumbs button,
+.pagination button,
+.hero-dots button {
+  -webkit-user-select: none;
+  caret-color: transparent;
+  user-select: none;
+}
+
+button,
 input,
 select,
 textarea {
@@ -1684,6 +1699,10 @@ textarea:focus {
 .details-thumbs button.is-active {
   border-color: var(--gold);
   box-shadow: 0 0 0 2px rgba(231, 201, 95, 0.18);
+}
+
+.details-thumbs button.is-image-broken {
+  display: none;
 }
 
 .details-thumbs img {

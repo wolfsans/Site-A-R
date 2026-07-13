@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 const WHATSAPP_URL = "https://wa.me/5549999487011";
+const FALLBACK_IMAGE = "assets/brand/aer-logo-transparent.png";
 const PAGE_SIZE = 6;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -244,10 +245,12 @@ async function loadVehicles() {
 }
 
 function mapVehicleFromDb(row) {
-  const images = (row.vehicle_images || [])
+  const images = normalizeVehicleImages(
+    (row.vehicle_images || [])
     .slice()
     .sort((a, b) => Number(a.sort_order) - Number(b.sort_order))
-    .map((image) => image.image_url);
+      .map((image) => image.image_url)
+  );
 
   return {
     id: String(row.id),
@@ -261,8 +264,22 @@ function mapVehicleFromDb(row) {
     featured: Boolean(row.featured),
     sold: Boolean(row.sold),
     description: row.description || "",
-    images: images.length ? images : ["assets/brand/aer-logo-transparent.png"]
+    images: images.length ? images : [FALLBACK_IMAGE]
   };
+}
+
+function isUsableVehicleImageUrl(url) {
+  const value = String(url || "").trim();
+  if (!value) return false;
+
+  const normalized = value.toLowerCase();
+  if (["undefined", "null", "false", "[object object]"].includes(normalized)) return false;
+
+  return /^(https?:|data:image\/|blob:|assets\/)/i.test(value);
+}
+
+function normalizeVehicleImages(images) {
+  return [...new Set((images || []).map((image) => String(image || "").trim()).filter(isUsableVehicleImageUrl))];
 }
 
 function qs(selector, scope = document) {
@@ -441,7 +458,7 @@ function vehicleCard(vehicle, showDescription = true) {
     <article class="vehicle-card reveal" data-card-id="${vehicle.id}" data-image-index="0">
       <div class="card-media">
         <a class="card-media-link" href="#detalhes?id=${vehicle.id}" aria-label="Ver detalhes de ${vehicle.title}">
-          <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" />
+          <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" data-vehicle-image />
         </a>
         ${
           vehicle.images.length > 1
@@ -508,7 +525,7 @@ function renderVehicleDetails() {
     <article class="vehicle-detail reveal is-visible">
       <div class="details-gallery" data-detail-gallery="${vehicle.id}" data-image-index="0">
         <div class="details-main-media">
-          <img src="${vehicle.images[0]}" alt="${vehicle.title}" />
+          <img src="${vehicle.images[0]}" alt="${vehicle.title}" data-vehicle-image />
           ${
             vehicle.images.length > 1
               ? `
@@ -527,7 +544,7 @@ function renderVehicleDetails() {
             .map(
               (image, index) => `
                 <button class="${index === 0 ? "is-active" : ""}" type="button" data-detail-thumb="${index}" aria-label="Foto ${index + 1}">
-                  <img src="${image}" alt="${vehicle.title} foto ${index + 1}" loading="lazy" />
+                  <img src="${image}" alt="${vehicle.title} foto ${index + 1}" loading="lazy" data-vehicle-image />
                 </button>
               `
             )
@@ -756,7 +773,7 @@ function renderAdminList() {
         .map(
           (vehicle) => `
             <article class="admin-row">
-              <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" />
+              <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" data-vehicle-image />
               <div>
                 <h3>${vehicle.title}</h3>
                 <p>${vehicle.year} | ${formatKm(vehicle.km)} | ${formatPrice(vehicle.price)} ${vehicle.sold ? "| Vendido" : ""}</p>
@@ -887,7 +904,7 @@ async function getVehicleImages(form) {
   const urlImages = String(form.get("images"))
     .split(/\n+/)
     .map((url) => url.trim())
-    .filter(Boolean);
+    .filter(isUsableVehicleImageUrl);
 
   const files = form.getAll("photoFiles").filter((file) => file instanceof File && file.size > 0);
   const uploadedImages = await Promise.all(files.map((file) => compressImageFile(file)));
@@ -918,12 +935,13 @@ async function uploadVehicleImages(files, vehicleId) {
 }
 
 async function replaceVehicleImages(vehicleId, imageUrls) {
-  if (!supabase || !imageUrls.length) return;
+  const validImageUrls = normalizeVehicleImages(imageUrls);
+  if (!supabase || !validImageUrls.length) return;
 
   const { error: deleteError } = await supabase.from("vehicle_images").delete().eq("vehicle_id", vehicleId);
   if (deleteError) throw deleteError;
 
-  const rows = imageUrls.map((image_url, sort_order) => ({
+  const rows = validImageUrls.map((image_url, sort_order) => ({
     vehicle_id: Number(vehicleId),
     image_url,
     sort_order
@@ -1223,6 +1241,29 @@ function observeRevealElements(scope = document) {
   elements.forEach((element) => window.revealObserver.observe(element));
 }
 
+function initImageFallbacks() {
+  document.addEventListener(
+    "error",
+    (event) => {
+      const image = event.target;
+      if (!(image instanceof HTMLImageElement) || !image.matches("[data-vehicle-image]")) return;
+
+      const thumb = image.closest("[data-detail-thumb]");
+      if (thumb) {
+        thumb.classList.add("is-image-broken");
+        thumb.setAttribute("aria-hidden", "true");
+        thumb.disabled = true;
+        return;
+      }
+
+      if (image.dataset.fallbackApplied === "true") return;
+      image.dataset.fallbackApplied = "true";
+      image.src = FALLBACK_IMAGE;
+    },
+    true
+  );
+}
+
 async function init() {
   await initializeAuth();
   await loadVehicles();
@@ -1236,6 +1277,7 @@ async function init() {
   initAdmin();
   initContactForm();
   initWhatsAppPanel();
+  initImageFallbacks();
   observeRevealElements();
 
   qs(".hero-prev").addEventListener("click", () => {
