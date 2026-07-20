@@ -67,7 +67,7 @@ img {
 .site-header {
   align-items: center;
   backdrop-filter: blur(18px);
-  background: rgba(8, 9, 8, 0.92);
+  background: #050505;
   border-bottom: 1px solid rgba(231, 201, 95, 0.28);
   display: flex;
   height: 76px;
@@ -1311,15 +1311,15 @@ textarea {
   color: var(--gold);
 }
 
-.site-header,{
-  background: #050505 !important;
-  border-color: rgba(231, 201, 95, 0.26) !important;
-             }
 .site-footer,
 .social-band {
   background:
     linear-gradient(135deg, rgba(231, 201, 95, 0.08), rgba(231, 201, 95, 0)),
     #050505;
+}
+
+.site-header {
+  background: #050505;
 }
 
 .floating-whatsapp {
@@ -1524,12 +1524,16 @@ body {
     #050505 !important;
 }
 
-.site-header,
 .site-footer,
 .social-band {
   background:
     linear-gradient(135deg, rgba(231, 201, 95, 0.08), transparent),
     #050505 !important;
+  border-color: rgba(231, 201, 95, 0.26) !important;
+}
+
+.site-header {
+  background: #050505 !important;
   border-color: rgba(231, 201, 95, 0.26) !important;
 }
 
