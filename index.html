@@ -193,10 +193,16 @@
                 <span id="vehicleCount">0 veículos</span>
                 <small>Estoque atualizado</small>
               </div>
-              <a class="button button-dark" href="#admin" id="stockAdminButton" hidden>
-                <i data-lucide="plus"></i>
-                Adicionar veículo
-              </a>
+              <div class="inventory-admin-actions">
+                <a class="button button-dark" href="#admin" id="stockAdminButton" hidden>
+                  <i data-lucide="plus"></i>
+                  Adicionar veículo
+                </a>
+                <button class="button button-outline" type="button" id="stockLogoutButton" hidden>
+                  <i data-lucide="log-out"></i>
+                  Sair
+                </button>
+              </div>
             </div>
             <div class="vehicle-grid" id="vehicleGrid"></div>
             <div class="pagination" id="pagination"></div>
@@ -316,11 +322,11 @@
           <div class="admin-intro">
             <span class="eyebrow">Admin</span>
             <h1>Gerenciar estoque</h1>
-            <p>Protótipo com login local para adicionar veículos e remover itens vendidos.</p>
+            <p>Acesse com seu usuário administrativo para adicionar veículos, editar anúncios e controlar itens vendidos.</p>
           </div>
 
           <section class="login-panel" id="loginPanel">
-            <form id="loginForm">
+            <form id="loginForm" novalidate>
               <h2>Acesso administrativo</h2>
               <label>
                 E-mail
@@ -330,9 +336,10 @@
                 Senha
                 <input name="password" type="password" autocomplete="current-password" required />
               </label>
-              <button class="button button-dark" type="submit">
+              <p class="form-message" id="loginMessage" role="alert" hidden></p>
+              <button class="button button-dark" type="submit" id="loginSubmitButton">
                 <i data-lucide="log-in"></i>
-                Entrar
+                <span id="loginSubmitText">Entrar</span>
               </button>
               <p class="form-note">Use o e-mail e senha cadastrados no Supabase Auth.</p>
             </form>

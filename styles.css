@@ -685,6 +685,14 @@ main {
   gap: 14px;
 }
 
+.inventory-admin-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .filter-title h2,
 .inventory-toolbar span,
 .contact-info h2,
@@ -923,6 +931,33 @@ textarea:focus {
   font-size: 0.92rem;
   line-height: 1.5;
   margin: 0;
+}
+
+.form-message {
+  border: 1px solid rgba(231, 201, 95, 0.28);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0;
+  padding: 11px 12px;
+}
+
+.form-message.is-error {
+  background: rgba(201, 154, 36, 0.1);
+  border-color: rgba(231, 201, 95, 0.42);
+}
+
+.form-message.is-success {
+  background: rgba(231, 201, 95, 0.12);
+}
+
+button:disabled,
+.button:disabled,
+.button.is-loading {
+  cursor: wait;
+  opacity: 0.68;
 }
 
 .admin-panel {

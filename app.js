@@ -753,6 +753,8 @@ function renderAdminState() {
   syncAdminAccess();
   qs("#loginPanel").hidden = logged;
   qs("#adminPanel").hidden = !logged;
+  setLoginLoading(false);
+  setLoginMessage("");
   if (logged) {
     renderAdminList();
   }
@@ -763,6 +765,46 @@ function syncAdminAccess() {
   const stockAdminButton = qs("#stockAdminButton");
   if (stockAdminButton) {
     stockAdminButton.hidden = !logged;
+  }
+
+  const stockLogoutButton = qs("#stockLogoutButton");
+  if (stockLogoutButton) {
+    stockLogoutButton.hidden = !logged;
+  }
+}
+
+function setLoginMessage(message, type = "error") {
+  const messageElement = qs("#loginMessage");
+  if (!messageElement) return;
+
+  messageElement.textContent = message;
+  messageElement.hidden = !message;
+  messageElement.classList.toggle("is-error", Boolean(message) && type === "error");
+  messageElement.classList.toggle("is-success", Boolean(message) && type === "success");
+}
+
+function setLoginLoading(isLoading) {
+  const button = qs("#loginSubmitButton");
+  const text = qs("#loginSubmitText");
+  if (!button || !text) return;
+
+  button.disabled = isLoading;
+  button.classList.toggle("is-loading", isLoading);
+  text.textContent = isLoading ? "Entrando..." : "Entrar";
+}
+
+async function logoutAdmin() {
+  if (supabase) {
+    await supabase.auth.signOut();
+  }
+
+  currentSession = null;
+  resetVehicleForm();
+  syncAdminAccess();
+  renderAdminState();
+
+  if (location.hash.replace("#", "").split("?")[0] === "admin") {
+    location.hash = "estoque";
   }
 }
 
@@ -1032,8 +1074,10 @@ function startVehicleEdit(vehicleId) {
 function initAdmin() {
   qs("#loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    setLoginMessage("");
+
     if (!supabase) {
-      alert("Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY para usar login real.");
+      setLoginMessage("Configuração do Supabase não encontrada. Verifique as variáveis de ambiente na Vercel.");
       return;
     }
 
@@ -1041,24 +1085,34 @@ function initAdmin() {
     const email = String(form.get("email")).trim();
     const password = String(form.get("password")).trim();
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert(`Login inválido: ${error.message}`);
+    if (!email || !password) {
+      setLoginMessage("Preencha e-mail e senha para acessar o painel administrativo.");
       return;
     }
 
-    currentSession = data.session;
-    event.currentTarget.reset();
-    renderAdminState();
+    setLoginLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setLoginMessage("E-mail ou senha inválidos. Confira os dados e tente novamente.");
+        return;
+      }
+
+      currentSession = data.session;
+      event.currentTarget.reset();
+      setLoginMessage("Login realizado com sucesso.", "success");
+      renderAdminState();
+      location.hash = "estoque";
+    } catch (error) {
+      setLoginMessage(`Não foi possível entrar agora: ${error.message}`);
+    } finally {
+      setLoginLoading(false);
+    }
   });
 
-  qs("#logoutButton").addEventListener("click", async () => {
-    if (supabase) {
-      await supabase.auth.signOut();
-    }
-    currentSession = null;
-    renderAdminState();
-  });
+  qs("#logoutButton").addEventListener("click", logoutAdmin);
+  qs("#stockLogoutButton")?.addEventListener("click", logoutAdmin);
 
   qs("#seedData").addEventListener("click", async () => {
     resetVehicleForm();
