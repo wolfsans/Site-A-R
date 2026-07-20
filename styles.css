@@ -34,6 +34,9 @@ body {
   background:
     radial-gradient(circle at 22% 0%, rgba(231, 201, 95, 0.08), transparent 28rem),
     linear-gradient(180deg, #050505 0%, #090907 42%, #050505 100%);
+  -webkit-user-select: none;
+  caret-color: transparent;
+  user-select: none;
 }
 
 a {
@@ -42,25 +45,18 @@ a {
 }
 
 button,
-.button,
-.text-button,
-.icon-button,
-.site-nav a,
-.nav-whatsapp,
-.floating-whatsapp,
-.details-thumbs button,
-.pagination button,
-.hero-dots button {
-  -webkit-user-select: none;
-  caret-color: transparent;
-  user-select: none;
-}
-
-button,
 input,
 select,
 textarea {
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  -webkit-user-select: text;
+  caret-color: auto;
+  user-select: text;
 }
 
 img {
