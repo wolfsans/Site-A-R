@@ -1311,7 +1311,10 @@ textarea {
   color: var(--gold);
 }
 
-.site-header,
+.site-header,{
+  background: #050505 !important;
+  border-color: rgba(231, 201, 95, 0.26) !important;
+             }
 .site-footer,
 .social-band {
   background:
