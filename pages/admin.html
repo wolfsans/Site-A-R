@@ -46,40 +46,40 @@
           <button class="text-button" type="button" id="cancelEdit" hidden>Cancelar edicao</button>
         </div>
 
-        <form class="vehicle-form" id="vehicleForm">
-          <label>
+        <form class="vehicle-form admin-form-grid" id="vehicleForm">
+          <label class="field-span-3">
             Modelo
             <input name="title" type="text" placeholder="Honda Civic EXL" required />
           </label>
-          <label>
+          <label class="field-span-3">
             Marca
             <input name="brand" type="text" placeholder="Honda" required />
           </label>
-          <label>
+          <label class="field-span-3">
             Ano
             <input name="year" type="number" min="1990" max="2035" placeholder="2022" required />
           </label>
-          <label>
+          <label class="field-span-3">
             Quilometragem
             <input name="km" type="number" min="0" step="100" placeholder="45000" required />
           </label>
-          <label>
+          <label class="field-span-3">
             Cambio
             <select name="transmission" required>
               <option value="Automático">Automatico</option>
               <option value="Manual">Manual</option>
             </select>
           </label>
-          <label>
+          <label class="field-span-3">
             Combustivel
             <input name="fuel" type="text" placeholder="Flex" required />
           </label>
-          <label>
+          <label class="field-span-3">
             Preco
             <input name="price" type="number" min="0" step="100" placeholder="89900" required />
             <small>Use 0 para exibir "Sob consulta".</small>
           </label>
-          <div class="wide-field photo-upload-field">
+          <div class="field-span-6 photo-upload-field">
             <span class="form-label">Fotos do veiculo</span>
             <label class="upload-box" for="vehiclePhotos">
               <i data-lucide="image-plus"></i>
@@ -90,21 +90,23 @@
             <div class="photo-preview" id="photoPreview" aria-live="polite"></div>
             <small>Ao editar, escolha novas fotos apenas se quiser substituir as imagens atuais.</small>
           </div>
-          <details class="wide-field optional-urls">
+          <details class="field-span-6 optional-urls">
             <summary>Adicionar fotos por URL, se necessario</summary>
             <label>
               URLs das fotos
               <textarea name="images" rows="4" placeholder="Opcional: uma URL por linha"></textarea>
             </label>
           </details>
-          <label class="wide-field">
+          <label class="field-span-6">
             Observacoes
             <textarea name="description" rows="3" placeholder="Resumo, opcionais e estado geral"></textarea>
           </label>
-          <button class="button button-dark" type="submit">
-            <i data-lucide="plus"></i>
-            <span id="vehicleSubmitText">Adicionar ao estoque</span>
-          </button>
+          <div class="form-actions field-span-12">
+            <button class="button button-dark" type="submit">
+              <i data-lucide="plus"></i>
+              <span id="vehicleSubmitText">Adicionar ao estoque</span>
+            </button>
+          </div>
         </form>
 
         <div class="admin-list" id="adminList"></div>
@@ -116,20 +118,20 @@
           <button class="text-button" type="button" id="cancelTestimonialEdit" hidden>Cancelar edicao</button>
         </div>
 
-        <form class="testimonial-form" id="testimonialForm">
-          <label>
+        <form class="testimonial-form admin-form-grid" id="testimonialForm">
+          <label class="field-span-5">
             Nome do cliente
             <input name="customer_name" type="text" placeholder="Fernanda Souza" required />
           </label>
-          <label>
+          <label class="field-span-2">
             Ordem
             <input name="sort_order" type="number" min="0" step="1" value="0" />
           </label>
-          <label class="toggle-field">
+          <label class="toggle-field field-span-5">
             <input name="active" type="checkbox" checked />
             Exibir depoimento no site
           </label>
-          <div class="wide-field photo-upload-field">
+          <div class="field-span-6 photo-upload-field">
             <span class="form-label">Foto da venda ou cliente</span>
             <label class="upload-box" for="testimonialPhoto">
               <i data-lucide="image-plus"></i>
@@ -140,14 +142,16 @@
             <div class="photo-preview single-preview" id="testimonialPhotoPreview" aria-live="polite"></div>
             <small>Ao editar, envie nova foto apenas se quiser substituir a atual.</small>
           </div>
-          <label class="wide-field">
+          <label class="field-span-6">
             Depoimento
             <textarea name="testimonial_text" rows="4" placeholder="Texto do depoimento do cliente" required></textarea>
           </label>
-          <button class="button button-dark" type="submit">
-            <i data-lucide="message-square-plus"></i>
-            <span id="testimonialSubmitText">Adicionar depoimento</span>
-          </button>
+          <div class="form-actions field-span-12">
+            <button class="button button-dark" type="submit">
+              <i data-lucide="message-square-plus"></i>
+              <span id="testimonialSubmitText">Adicionar depoimento</span>
+            </button>
+          </div>
         </form>
 
         <div class="admin-list testimonial-admin-list" id="testimonialAdminList"></div>

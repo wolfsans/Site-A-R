@@ -971,10 +971,13 @@ textarea:focus {
 }
 
 button:disabled,
-.button:disabled,
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
 .button.is-loading {
   cursor: wait;
-  opacity: 0.68;
 }
 
 .admin-panel {
@@ -1039,12 +1042,33 @@ button:disabled,
   margin: 0;
 }
 
+.admin-form-grid,
 .vehicle-form,
 .testimonial-form {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 18px;
+  gap: 18px 20px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin-top: 20px;
+}
+
+.field-span-2 {
+  grid-column: span 2;
+}
+
+.field-span-3 {
+  grid-column: span 3;
+}
+
+.field-span-5 {
+  grid-column: span 5;
+}
+
+.field-span-6 {
+  grid-column: span 6;
+}
+
+.field-span-12 {
+  grid-column: 1 / -1;
 }
 
 .wide-field {
@@ -1118,12 +1142,12 @@ button:disabled,
 
 .toggle-field {
   align-items: center;
-  align-self: end;
+  align-self: stretch;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   display: flex;
   gap: 10px;
-  min-height: 66px;
+  min-height: 100%;
   padding: 12px 14px;
 }
 
@@ -1149,9 +1173,10 @@ button:disabled,
   margin-top: 12px;
 }
 
-.vehicle-form .button,
-.testimonial-form .button {
-  align-self: end;
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 2px;
 }
 
 .admin-list {
@@ -1167,8 +1192,8 @@ button:disabled,
   border-radius: var(--radius);
   display: grid;
   gap: 16px;
-  grid-template-columns: 84px 1fr auto;
-  padding: 10px;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  padding: 12px;
 }
 
 .admin-row img {
@@ -1184,6 +1209,12 @@ button:disabled,
 .admin-row p {
   color: var(--muted);
   margin: 0;
+}
+
+.admin-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .testimonial-admin-row {
@@ -1207,10 +1238,14 @@ button:disabled,
 }
 
 .admin-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 8px;
+  grid-template-columns: repeat(2, minmax(118px, 1fr));
   justify-content: flex-end;
+}
+
+.testimonial-admin-row .admin-actions {
+  grid-template-columns: repeat(3, minmax(108px, 1fr));
 }
 
 .site-footer {
@@ -1463,9 +1498,32 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .admin-form-grid,
   .vehicle-form,
   .testimonial-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .field-span-2,
+  .field-span-3 {
+    grid-column: span 3;
+  }
+
+  .field-span-5,
+  .field-span-6,
+  .field-span-12 {
+    grid-column: 1 / -1;
+  }
+
+  .admin-row,
+  .testimonial-admin-row {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .admin-actions,
+  .testimonial-admin-row .admin-actions {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -1589,6 +1647,7 @@ textarea {
 
   .vehicle-grid,
   .horizontal-rail,
+  .admin-form-grid,
   .vehicle-form,
   .testimonial-form,
   .split-fields,
@@ -1596,8 +1655,13 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .field-span-2,
+  .field-span-3,
+  .field-span-5,
+  .field-span-6,
+  .field-span-12,
   .wide-field {
-    grid-column: auto;
+    grid-column: 1 / -1;
   }
 
   .card-actions {
@@ -1614,6 +1678,11 @@ textarea {
 
   .admin-row img {
     width: 100%;
+  }
+
+  .admin-actions,
+  .testimonial-admin-row .admin-actions {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -12,6 +12,7 @@ import storeFacadeUrl from "./assets/store/fachada-noite-limpa.jpg";
 const WHATSAPP_URL = "https://wa.me/5549999487011";
 const FALLBACK_IMAGE = logoTransparentUrl;
 const PAGE_SIZE = 6;
+const MAX_FEATURED_VEHICLES = 5;
 const PAGE_TEMPLATES = [homePage, stockPage, detailsPage, aboutPage, contactPage, adminPage].map(resolveTemplateAssets);
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -334,8 +335,8 @@ function moveHero(direction) {
 }
 
 function getHeroSlides() {
-  const featured = vehicles.filter((vehicle) => vehicle.featured && !vehicle.sold).slice(0, 4);
-  return featured.length ? featured : vehicles.filter((vehicle) => !vehicle.sold).slice(0, 4);
+  const featured = vehicles.filter((vehicle) => vehicle.featured && !vehicle.sold).slice(0, MAX_FEATURED_VEHICLES);
+  return featured.length ? featured : vehicles.filter((vehicle) => !vehicle.sold).slice(0, MAX_FEATURED_VEHICLES);
 }
 
 function startHeroTimer() {
@@ -345,11 +346,11 @@ function startHeroTimer() {
 
 function renderFeaturedRail() {
   const rail = qs("#featuredRail");
-  const featured = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8);
+  const latestVehicles = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8);
   const perPage = getFeaturedPerPage();
-  const totalPages = Math.max(1, Math.ceil(featured.length / perPage));
+  const totalPages = Math.max(1, Math.ceil(latestVehicles.length / perPage));
   featuredPage = Math.min(featuredPage, totalPages - 1);
-  const pageItems = featured.slice(featuredPage * perPage, featuredPage * perPage + perPage);
+  const pageItems = latestVehicles.slice(featuredPage * perPage, featuredPage * perPage + perPage);
 
   rail.innerHTML = pageItems.map((vehicle) => vehicleCard(vehicle, false)).join("");
   qs("#featuredPrev").disabled = featuredPage === 0;
@@ -366,8 +367,8 @@ function getFeaturedPerPage() {
 }
 
 function moveFeatured(direction) {
-  const featuredCount = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8).length;
-  const totalPages = Math.max(1, Math.ceil(featuredCount / getFeaturedPerPage()));
+  const latestCount = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8).length;
+  const totalPages = Math.max(1, Math.ceil(latestCount / getFeaturedPerPage()));
   featuredPage = Math.min(Math.max(featuredPage + direction, 0), totalPages - 1);
   renderFeaturedRail();
 }
@@ -759,19 +760,30 @@ async function logoutAdmin() {
 
 function renderAdminList() {
   const list = qs("#adminList");
+  const featuredCount = vehicles.filter((vehicle) => vehicle.featured && !vehicle.sold).length;
   list.innerHTML = vehicles.length
     ? vehicles
         .map(
-          (vehicle) => `
+          (vehicle) => {
+            const canFeature = vehicle.featured || (!vehicle.sold && featuredCount < MAX_FEATURED_VEHICLES);
+            const featuredLabel = vehicle.featured ? "Tirar destaque" : "Destaque";
+            return `
             <article class="admin-row">
               <img src="${vehicle.images[0]}" alt="${vehicle.title}" loading="lazy" data-vehicle-image />
               <div>
                 <h3>${vehicle.title}</h3>
                 <p>${vehicle.year} | ${formatKm(vehicle.km)} | ${formatPrice(vehicle.price)} ${vehicle.sold ? "| Vendido" : ""}</p>
+                <div class="admin-statuses">
+                  <span class="status-pill ${vehicle.featured ? "is-active" : ""}">${vehicle.featured ? "No destaque" : "Fora do destaque"}</span>
+                  ${vehicle.sold ? `<span class="status-pill">Vendido</span>` : ""}
+                </div>
               </div>
               <div class="admin-actions">
                 <button class="button button-outline" type="button" data-edit="${vehicle.id}">
                   Editar
+                </button>
+                <button class="button button-outline" type="button" data-toggle-featured="${vehicle.id}" ${canFeature ? "" : "disabled"} title="${canFeature ? "" : `Limite de ${MAX_FEATURED_VEHICLES} destaques atingido`}">
+                  ${featuredLabel}
                 </button>
                 <button class="button button-outline" type="button" data-toggle-sold="${vehicle.id}">
                   ${vehicle.sold ? "Reativar" : "Vendido"}
@@ -781,10 +793,19 @@ function renderAdminList() {
                 </button>
               </div>
             </article>
-          `
+          `;
+          }
         )
         .join("")
     : `<div class="empty-state">Nenhum veículo cadastrado.</div>`;
+
+  qsa("[data-toggle-featured]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const vehicle = vehicles.find((item) => item.id === button.dataset.toggleFeatured);
+      if (!vehicle) return;
+      await updateVehicleFeatured(vehicle, !vehicle.featured);
+    });
+  });
 
   qsa("[data-toggle-sold]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -900,6 +921,28 @@ async function updateVehicleSold(vehicle, sold) {
   const { error } = await supabase.from("vehicles").update({ sold }).eq("id", vehicle.id);
   if (error) {
     alert(`Não foi possível atualizar o veículo: ${error.message}`);
+    return;
+  }
+
+  await refreshVehicles();
+}
+
+async function updateVehicleFeatured(vehicle, featured) {
+  const featuredCount = vehicles.filter((item) => item.featured && !item.sold && item.id !== vehicle.id).length;
+  if (featured && featuredCount >= MAX_FEATURED_VEHICLES) {
+    alert(`Você pode marcar no máximo ${MAX_FEATURED_VEHICLES} veículos em destaque.`);
+    return;
+  }
+
+  if (!supabase) {
+    vehicle.featured = featured;
+    await refreshVehicles();
+    return;
+  }
+
+  const { error } = await supabase.from("vehicles").update({ featured }).eq("id", vehicle.id);
+  if (error) {
+    alert(`Não foi possível atualizar o destaque: ${error.message}`);
     return;
   }
 
@@ -1051,7 +1094,7 @@ async function saveVehicleToSupabase(form, currentVehicle, rawImages) {
     transmission: String(form.get("transmission")),
     fuel: String(form.get("fuel")).trim(),
     price: Number(form.get("price") || 0),
-    featured: currentVehicle?.featured ?? true,
+    featured: currentVehicle?.featured ?? false,
     sold: currentVehicle?.sold || false,
     description: String(form.get("description")).trim()
   };
@@ -1307,7 +1350,7 @@ function initAdmin() {
           transmission: String(form.get("transmission")),
           fuel: String(form.get("fuel")).trim(),
           price: Number(form.get("price")),
-          featured: currentVehicle?.featured ?? true,
+          featured: currentVehicle?.featured ?? false,
           sold: currentVehicle?.sold || false,
           description: String(form.get("description")).trim(),
           images: images.length ? images.map((image) => (typeof image === "string" ? image : URL.createObjectURL(image))) : currentVehicle.images
