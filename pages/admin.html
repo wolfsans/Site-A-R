@@ -1,0 +1,157 @@
+<section class="page page-admin" id="admin" data-page="admin">
+  <section class="admin-shell">
+    <div class="admin-intro">
+      <span class="eyebrow">Admin</span>
+      <h1>Gerenciar conteudo</h1>
+      <p>Acesse com seu usuario administrativo para controlar veiculos, depoimentos e fotos de venda.</p>
+    </div>
+
+    <section class="login-panel" id="loginPanel">
+      <form id="loginForm" novalidate>
+        <h2>Acesso administrativo</h2>
+        <label>
+          E-mail
+          <input name="email" type="email" autocomplete="username" required />
+        </label>
+        <label>
+          Senha
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <p class="form-message" id="loginMessage" role="alert" hidden></p>
+        <button class="button button-dark" type="submit" id="loginSubmitButton">
+          <i data-lucide="log-in"></i>
+          <span id="loginSubmitText">Entrar</span>
+        </button>
+        <p class="form-note">Use o e-mail e senha cadastrados no Supabase Auth.</p>
+      </form>
+    </section>
+
+    <section class="admin-panel" id="adminPanel" hidden>
+      <div class="admin-toolbar">
+        <h2>Painel administrativo</h2>
+        <div>
+          <button class="text-button" type="button" id="seedData">Atualizar listas</button>
+          <button class="text-button danger" type="button" id="logoutButton">Sair</button>
+        </div>
+      </div>
+
+      <div class="admin-tabs" role="tablist" aria-label="Areas administrativas">
+        <button class="is-active" type="button" data-admin-tab="vehicles">Veiculos</button>
+        <button type="button" data-admin-tab="testimonials">Depoimentos</button>
+      </div>
+
+      <div class="admin-tab-panel is-active" id="adminVehiclesPanel" data-admin-panel="vehicles">
+        <div class="admin-section-head">
+          <h3 id="adminFormTitle">Novo veiculo</h3>
+          <button class="text-button" type="button" id="cancelEdit" hidden>Cancelar edicao</button>
+        </div>
+
+        <form class="vehicle-form" id="vehicleForm">
+          <label>
+            Modelo
+            <input name="title" type="text" placeholder="Honda Civic EXL" required />
+          </label>
+          <label>
+            Marca
+            <input name="brand" type="text" placeholder="Honda" required />
+          </label>
+          <label>
+            Ano
+            <input name="year" type="number" min="1990" max="2035" placeholder="2022" required />
+          </label>
+          <label>
+            Quilometragem
+            <input name="km" type="number" min="0" step="100" placeholder="45000" required />
+          </label>
+          <label>
+            Cambio
+            <select name="transmission" required>
+              <option value="Automático">Automatico</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </label>
+          <label>
+            Combustivel
+            <input name="fuel" type="text" placeholder="Flex" required />
+          </label>
+          <label>
+            Preco
+            <input name="price" type="number" min="0" step="100" placeholder="89900" required />
+            <small>Use 0 para exibir "Sob consulta".</small>
+          </label>
+          <div class="wide-field photo-upload-field">
+            <span class="form-label">Fotos do veiculo</span>
+            <label class="upload-box" for="vehiclePhotos">
+              <i data-lucide="image-plus"></i>
+              <strong>Escolher fotos do computador</strong>
+              <small>Selecione uma ou mais imagens do veiculo.</small>
+              <input id="vehiclePhotos" name="photoFiles" type="file" accept="image/*" multiple />
+            </label>
+            <div class="photo-preview" id="photoPreview" aria-live="polite"></div>
+            <small>Ao editar, escolha novas fotos apenas se quiser substituir as imagens atuais.</small>
+          </div>
+          <details class="wide-field optional-urls">
+            <summary>Adicionar fotos por URL, se necessario</summary>
+            <label>
+              URLs das fotos
+              <textarea name="images" rows="4" placeholder="Opcional: uma URL por linha"></textarea>
+            </label>
+          </details>
+          <label class="wide-field">
+            Observacoes
+            <textarea name="description" rows="3" placeholder="Resumo, opcionais e estado geral"></textarea>
+          </label>
+          <button class="button button-dark" type="submit">
+            <i data-lucide="plus"></i>
+            <span id="vehicleSubmitText">Adicionar ao estoque</span>
+          </button>
+        </form>
+
+        <div class="admin-list" id="adminList"></div>
+      </div>
+
+      <div class="admin-tab-panel" id="adminTestimonialsPanel" data-admin-panel="testimonials">
+        <div class="admin-section-head">
+          <h3 id="testimonialFormTitle">Novo depoimento</h3>
+          <button class="text-button" type="button" id="cancelTestimonialEdit" hidden>Cancelar edicao</button>
+        </div>
+
+        <form class="testimonial-form" id="testimonialForm">
+          <label>
+            Nome do cliente
+            <input name="customer_name" type="text" placeholder="Fernanda Souza" required />
+          </label>
+          <label>
+            Ordem
+            <input name="sort_order" type="number" min="0" step="1" value="0" />
+          </label>
+          <label class="toggle-field">
+            <input name="active" type="checkbox" checked />
+            Exibir depoimento no site
+          </label>
+          <div class="wide-field photo-upload-field">
+            <span class="form-label">Foto da venda ou cliente</span>
+            <label class="upload-box" for="testimonialPhoto">
+              <i data-lucide="image-plus"></i>
+              <strong>Escolher 1 foto</strong>
+              <small>Use uma imagem da venda, entrega do veiculo ou cliente.</small>
+              <input id="testimonialPhoto" name="testimonialPhoto" type="file" accept="image/*" />
+            </label>
+            <div class="photo-preview single-preview" id="testimonialPhotoPreview" aria-live="polite"></div>
+            <small>Ao editar, envie nova foto apenas se quiser substituir a atual.</small>
+          </div>
+          <label class="wide-field">
+            Depoimento
+            <textarea name="testimonial_text" rows="4" placeholder="Texto do depoimento do cliente" required></textarea>
+          </label>
+          <button class="button button-dark" type="submit">
+            <i data-lucide="message-square-plus"></i>
+            <span id="testimonialSubmitText">Adicionar depoimento</span>
+          </button>
+        </form>
+
+        <div class="admin-list testimonial-admin-list" id="testimonialAdminList"></div>
+      </div>
+    </section>
+  </section>
+</section>

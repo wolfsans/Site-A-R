@@ -1,8 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
+import { seedVehicles } from "./data/seedVehicles.js";
+import homePage from "./pages/home.html?raw";
+import stockPage from "./pages/stock.html?raw";
+import detailsPage from "./pages/details.html?raw";
+import aboutPage from "./pages/about.html?raw";
+import contactPage from "./pages/contact.html?raw";
+import adminPage from "./pages/admin.html?raw";
 
 const WHATSAPP_URL = "https://wa.me/5549999487011";
 const FALLBACK_IMAGE = "assets/brand/aer-logo-transparent.png";
 const PAGE_SIZE = 6;
+const PAGE_TEMPLATES = [homePage, stockPage, detailsPage, aboutPage, contactPage, adminPage];
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const STORAGE_BUCKET = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || "vehicle-photos";
@@ -37,182 +45,43 @@ function createId() {
   return `veh_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-const seedVehicles = [
-  {
-    id: createId(),
-    title: "Ford Ka Sedan 1.5",
-    brand: "Ford",
-    year: "2022",
-    km: 70000,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 0,
-    featured: true,
-    sold: false,
-    description: "Ford Ka Sedan 1.5 2022, câmbio automático, 70 mil km, cor branca, interior em couro, multimídia, rodas de liga, faróis de neblina e excelente apresentação.",
-    images: [
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-01.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-08.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-09.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-11.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-12.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-13.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-02.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-10.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-14.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-04.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-05.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-03.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-06.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-07.jpeg"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Toyota Corolla XEi",
-    brand: "Toyota",
-    year: "2021/2022",
-    km: 41500,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 134900,
-    featured: true,
-    sold: false,
-    description: "Sedan completo, excelente conservação, central multimídia e revisões em dia.",
-    images: [
-      "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Honda Civic EXL",
-    brand: "Honda",
-    year: "2020/2021",
-    km: 52000,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 128900,
-    featured: true,
-    sold: false,
-    description: "Interior refinado, ótimo desempenho e pacote completo de conforto.",
-    images: [
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Volkswagen T-Cross Highline",
-    brand: "Volkswagen",
-    year: "2022/2023",
-    km: 28600,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 146900,
-    featured: true,
-    sold: false,
-    description: "SUV moderno, alto nível de segurança, painel digital e ótimo espaço interno.",
-    images: [
-      "https://images.unsplash.com/photo-1597007066704-67bf2068d5b2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Chevrolet Onix Premier",
-    brand: "Chevrolet",
-    year: "2021/2021",
-    km: 37800,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 82900,
-    featured: false,
-    sold: false,
-    description: "Hatch econômico, completo e pronto para o dia a dia.",
-    images: [
-      "https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Jeep Compass Longitude",
-    brand: "Jeep",
-    year: "2019/2020",
-    km: 64000,
-    transmission: "Automático",
-    fuel: "Flex",
-    price: 112900,
-    featured: true,
-    sold: false,
-    description: "SUV robusto, confortável e com excelente presença.",
-    images: [
-      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Fiat Strada Volcano",
-    brand: "Fiat",
-    year: "2022/2022",
-    km: 33200,
-    transmission: "Manual",
-    fuel: "Flex",
-    price: 96900,
-    featured: false,
-    sold: false,
-    description: "Picape versátil, cabine dupla e ótimo custo de manutenção.",
-    images: [
-      "https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1532581140115-3e355d1ed1de?auto=format&fit=crop&w=1200&q=80"
-    ]
-  },
-  {
-    id: createId(),
-    title: "Hyundai HB20 Comfort",
-    brand: "Hyundai",
-    year: "2020/2020",
-    km: 58700,
-    transmission: "Manual",
-    fuel: "Flex",
-    price: 67900,
-    featured: false,
-    sold: false,
-    description: "Compacto bem cuidado, econômico e com boa procura no mercado.",
-    images: [
-      "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80"
-    ]
-  }
-];
 
-const testimonials = [
+const seedTestimonials = [
   {
+    id: "seed-marcos-almeida",
     name: "Marcos Almeida",
     text: "Atendimento rápido e negociação muito clara. Consegui ver todos os detalhes antes de fechar a compra.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+    sortOrder: 0,
+    active: true
   },
   {
+    id: "seed-fernanda-souza",
     name: "Fernanda Souza",
     text: "Gostei da atenção no WhatsApp e da organização das informações. O processo ficou simples do começo ao fim.",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+    sortOrder: 1,
+    active: true
   },
   {
+    id: "seed-rafael-martins",
     name: "Rafael Martins",
     text: "A loja passou confiança e ajudou na escolha do carro certo para a minha rotina.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    sortOrder: 2,
+    active: true
   }
 ];
 
 let vehicles = [];
+let testimonials = [...seedTestimonials];
 let currentPage = 1;
 let featuredPage = 0;
 let heroIndex = 0;
 let testimonialIndex = 0;
 let heroTimer;
 let editingVehicleId = null;
+let editingTestimonialId = null;
 let currentSession = null;
 
 const currency = new Intl.NumberFormat("pt-BR", {
@@ -244,6 +113,28 @@ async function loadVehicles() {
   return vehicles;
 }
 
+async function loadTestimonials() {
+  if (!supabase) {
+    testimonials = [...seedTestimonials];
+    return testimonials;
+  }
+
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn("Erro ao carregar depoimentos:", error);
+    testimonials = [...seedTestimonials];
+    return testimonials;
+  }
+
+  testimonials = (data || []).map(mapTestimonialFromDb);
+  return testimonials;
+}
+
 function mapVehicleFromDb(row) {
   const images = normalizeVehicleImages(
     (row.vehicle_images || [])
@@ -268,6 +159,17 @@ function mapVehicleFromDb(row) {
   };
 }
 
+function mapTestimonialFromDb(row) {
+  return {
+    id: String(row.id),
+    name: row.customer_name || "Cliente A&R",
+    text: row.testimonial_text || "",
+    image: isUsableVehicleImageUrl(row.image_url) ? row.image_url : FALLBACK_IMAGE,
+    sortOrder: Number(row.sort_order || 0),
+    active: row.active !== false
+  };
+}
+
 function isUsableVehicleImageUrl(url) {
   const value = String(url || "").trim();
   if (!value) return false;
@@ -288,6 +190,14 @@ function qs(selector, scope = document) {
 
 function qsa(selector, scope = document) {
   return [...scope.querySelectorAll(selector)];
+}
+
+function mountPageTemplates() {
+  const root = qs("#pageRoot");
+  if (!root || root.dataset.mounted === "true") return;
+
+  root.innerHTML = PAGE_TEMPLATES.join("\n");
+  root.dataset.mounted = "true";
 }
 
 function formatKm(value) {
@@ -615,7 +525,27 @@ function bindCardCarousels(scope = document) {
 }
 
 function renderTestimonials() {
-  qs("#testimonialStage").innerHTML = testimonials
+  const stage = qs("#testimonialStage");
+  const visibleTestimonials = testimonials.filter((item) => item.active !== false);
+
+  if (!stage) return;
+
+  if (!visibleTestimonials.length) {
+    stage.innerHTML = `
+      <article class="testimonial-card is-active">
+        <img src="${FALLBACK_IMAGE}" alt="A&R Automóveis" loading="lazy" />
+        <div>
+          <div class="stars">★★★★★</div>
+          <p>"Depoimentos de clientes serão exibidos aqui em breve."</p>
+          <strong>A&R Automóveis</strong>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
+  testimonialIndex = testimonialIndex % visibleTestimonials.length;
+  stage.innerHTML = visibleTestimonials
     .map(
       (item, index) => `
         <article class="testimonial-card ${index === testimonialIndex ? "is-active" : ""}">
@@ -632,7 +562,10 @@ function renderTestimonials() {
 }
 
 function moveTestimonial(direction) {
-  testimonialIndex = (testimonialIndex + direction + testimonials.length) % testimonials.length;
+  const count = testimonials.filter((item) => item.active !== false).length;
+  if (!count) return;
+
+  testimonialIndex = (testimonialIndex + direction + count) % count;
   renderTestimonials();
 }
 
@@ -757,6 +690,7 @@ function renderAdminState() {
   setLoginMessage("");
   if (logged) {
     renderAdminList();
+    renderTestimonialAdminList();
   }
 }
 
@@ -800,6 +734,7 @@ async function logoutAdmin() {
 
   currentSession = null;
   resetVehicleForm();
+  resetTestimonialForm();
   syncAdminAccess();
   renderAdminState();
 
@@ -861,6 +796,60 @@ function renderAdminList() {
   });
 }
 
+function renderTestimonialAdminList() {
+  const list = qs("#testimonialAdminList");
+  if (!list) return;
+
+  list.innerHTML = testimonials.length
+    ? testimonials
+        .map(
+          (item) => `
+            <article class="admin-row testimonial-admin-row">
+              <img src="${item.image}" alt="${item.name}" loading="lazy" data-vehicle-image />
+              <div>
+                <h3>${item.name}</h3>
+                <p>${item.text}</p>
+                <span class="status-pill ${item.active ? "is-active" : ""}">${item.active ? "Ativo no site" : "Oculto"}</span>
+              </div>
+              <div class="admin-actions">
+                <button class="button button-outline" type="button" data-edit-testimonial="${item.id}">
+                  Editar
+                </button>
+                <button class="button button-outline" type="button" data-toggle-testimonial="${item.id}">
+                  ${item.active ? "Ocultar" : "Ativar"}
+                </button>
+                <button class="button button-dark" type="button" data-remove-testimonial="${item.id}">
+                  Remover
+                </button>
+              </div>
+            </article>
+          `
+        )
+        .join("")
+    : `<div class="empty-state">Nenhum depoimento cadastrado.</div>`;
+
+  qsa("[data-edit-testimonial]").forEach((button) => {
+    button.addEventListener("click", () => startTestimonialEdit(button.dataset.editTestimonial));
+  });
+
+  qsa("[data-toggle-testimonial]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const testimonial = testimonials.find((item) => item.id === button.dataset.toggleTestimonial);
+      if (!testimonial) return;
+      await updateTestimonialActive(testimonial, !testimonial.active);
+    });
+  });
+
+  qsa("[data-remove-testimonial]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      if (editingTestimonialId === button.dataset.removeTestimonial) {
+        resetTestimonialForm();
+      }
+      await removeTestimonial(button.dataset.removeTestimonial);
+    });
+  });
+}
+
 async function refreshVehicles() {
   if (supabase) {
     await loadVehicles();
@@ -872,6 +861,18 @@ async function refreshVehicles() {
   renderInventory();
   if (currentSession) {
     renderAdminList();
+  }
+}
+
+async function refreshTestimonials() {
+  if (supabase) {
+    await loadTestimonials();
+  }
+
+  testimonialIndex = 0;
+  renderTestimonials();
+  if (currentSession) {
+    renderTestimonialAdminList();
   }
 }
 
@@ -891,6 +892,22 @@ async function updateVehicleSold(vehicle, sold) {
   await refreshVehicles();
 }
 
+async function updateTestimonialActive(testimonial, active) {
+  if (!supabase) {
+    testimonial.active = active;
+    await refreshTestimonials();
+    return;
+  }
+
+  const { error } = await supabase.from("testimonials").update({ active }).eq("id", testimonial.id);
+  if (error) {
+    alert(`Não foi possível atualizar o depoimento: ${error.message}`);
+    return;
+  }
+
+  await refreshTestimonials();
+}
+
 async function removeVehicle(vehicleId) {
   if (!confirm("Remover este veículo do estoque?")) return;
 
@@ -907,6 +924,24 @@ async function removeVehicle(vehicleId) {
   }
 
   await refreshVehicles();
+}
+
+async function removeTestimonial(testimonialId) {
+  if (!confirm("Remover este depoimento?")) return;
+
+  if (!supabase) {
+    testimonials = testimonials.filter((item) => item.id !== testimonialId);
+    await refreshTestimonials();
+    return;
+  }
+
+  const { error } = await supabase.from("testimonials").delete().eq("id", testimonialId);
+  if (error) {
+    alert(`Não foi possível remover o depoimento: ${error.message}`);
+    return;
+  }
+
+  await refreshTestimonials();
 }
 
 function compressImageFile(file, maxSize = 1280, quality = 0.78) {
@@ -1023,6 +1058,55 @@ async function saveVehicleToSupabase(form, currentVehicle, rawImages) {
   return vehicleId;
 }
 
+async function getTestimonialImage(form) {
+  const file = form.get("testimonialPhoto");
+  if (!(file instanceof File) || !file.size) return null;
+
+  return compressImageFile(file, 1280, 0.78);
+}
+
+async function uploadTestimonialImage(blob, testimonialId) {
+  if (!supabase || !blob) return "";
+
+  const filePath = `testimonials/${testimonialId}/${Date.now()}.jpg`;
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filePath, blob, {
+    contentType: "image/jpeg",
+    upsert: true
+  });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+  return data?.publicUrl || "";
+}
+
+async function saveTestimonialToSupabase(form, currentTestimonial, imageBlob) {
+  const payload = {
+    customer_name: String(form.get("customer_name")).trim(),
+    testimonial_text: String(form.get("testimonial_text")).trim(),
+    sort_order: Number(form.get("sort_order") || 0),
+    active: form.get("active") === "on"
+  };
+
+  const query = currentTestimonial
+    ? supabase.from("testimonials").update(payload).eq("id", currentTestimonial.id).select("id").single()
+    : supabase.from("testimonials").insert(payload).select("id").single();
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const testimonialId = data.id;
+  if (imageBlob) {
+    const imageUrl = await uploadTestimonialImage(imageBlob, testimonialId);
+    if (isUsableVehicleImageUrl(imageUrl)) {
+      const { error: imageError } = await supabase.from("testimonials").update({ image_url: imageUrl }).eq("id", testimonialId);
+      if (imageError) throw imageError;
+    }
+  }
+
+  return testimonialId;
+}
+
 function renderSelectedPhotoPreview() {
   const input = qs("#vehiclePhotos");
   const preview = qs("#photoPreview");
@@ -1038,6 +1122,15 @@ function renderSelectedPhotoPreview() {
     .join("");
 }
 
+function renderSelectedTestimonialPhotoPreview() {
+  const input = qs("#testimonialPhoto");
+  const preview = qs("#testimonialPhotoPreview");
+  if (!input || !preview) return;
+
+  const file = input.files?.[0];
+  preview.innerHTML = file ? `<img src="${URL.createObjectURL(file)}" alt="${file.name}" loading="lazy" />` : "";
+}
+
 function resetVehicleForm() {
   editingVehicleId = null;
   qs("#vehicleForm").reset();
@@ -1045,6 +1138,19 @@ function resetVehicleForm() {
   qs("#adminFormTitle").textContent = "Novo veículo";
   qs("#vehicleSubmitText").textContent = "Adicionar ao estoque";
   qs("#cancelEdit").hidden = true;
+}
+
+function resetTestimonialForm() {
+  editingTestimonialId = null;
+  const form = qs("#testimonialForm");
+  if (!form) return;
+
+  form.reset();
+  form.elements.active.checked = true;
+  qs("#testimonialPhotoPreview").innerHTML = "";
+  qs("#testimonialFormTitle").textContent = "Novo depoimento";
+  qs("#testimonialSubmitText").textContent = "Adicionar depoimento";
+  qs("#cancelTestimonialEdit").hidden = true;
 }
 
 function startVehicleEdit(vehicleId) {
@@ -1069,6 +1175,37 @@ function startVehicleEdit(vehicleId) {
   qs("#vehicleSubmitText").textContent = "Salvar alterações";
   qs("#cancelEdit").hidden = false;
   form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function startTestimonialEdit(testimonialId) {
+  const testimonial = testimonials.find((item) => item.id === testimonialId);
+  if (!testimonial) return;
+
+  editingTestimonialId = testimonialId;
+  const form = qs("#testimonialForm");
+  form.elements.customer_name.value = testimonial.name || "";
+  form.elements.sort_order.value = testimonial.sortOrder || 0;
+  form.elements.active.checked = testimonial.active !== false;
+  form.elements.testimonial_text.value = testimonial.text || "";
+  qs("#testimonialPhotoPreview").innerHTML = isUsableVehicleImageUrl(testimonial.image)
+    ? `<img src="${testimonial.image}" alt="${testimonial.name}" loading="lazy" data-vehicle-image />`
+    : "";
+
+  qs("#testimonialFormTitle").textContent = `Editar: ${testimonial.name}`;
+  qs("#testimonialSubmitText").textContent = "Salvar depoimento";
+  qs("#cancelTestimonialEdit").hidden = false;
+  switchAdminTab("testimonials");
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function switchAdminTab(tabName) {
+  qsa("[data-admin-tab]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.adminTab === tabName);
+  });
+
+  qsa("[data-admin-panel]").forEach((panel) => {
+    panel.classList.toggle("is-active", panel.dataset.adminPanel === tabName);
+  });
 }
 
 function initAdmin() {
@@ -1116,12 +1253,21 @@ function initAdmin() {
 
   qs("#seedData").addEventListener("click", async () => {
     resetVehicleForm();
+    resetTestimonialForm();
     await loadVehicles();
+    await loadTestimonials();
     await refreshVehicles();
+    await refreshTestimonials();
+  });
+
+  qsa("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => switchAdminTab(button.dataset.adminTab));
   });
 
   qs("#cancelEdit").addEventListener("click", resetVehicleForm);
   qs("#vehiclePhotos").addEventListener("change", renderSelectedPhotoPreview);
+  qs("#cancelTestimonialEdit").addEventListener("click", resetTestimonialForm);
+  qs("#testimonialPhoto").addEventListener("change", renderSelectedTestimonialPhotoPreview);
 
   qs("#vehicleForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1164,6 +1310,46 @@ function initAdmin() {
       await refreshVehicles();
     } catch (error) {
       alert(`Não foi possível salvar o veículo: ${error.message}`);
+    }
+  });
+
+  qs("#testimonialForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const currentTestimonial = editingTestimonialId ? testimonials.find((item) => item.id === editingTestimonialId) : null;
+    const customerName = String(form.get("customer_name")).trim();
+    const testimonialText = String(form.get("testimonial_text")).trim();
+
+    if (!customerName || !testimonialText) {
+      alert("Preencha o nome do cliente e o texto do depoimento.");
+      return;
+    }
+
+    try {
+      const image = await getTestimonialImage(form);
+      if (supabase) {
+        await saveTestimonialToSupabase(form, currentTestimonial, image);
+      } else {
+        const testimonialPayload = {
+          id: currentTestimonial?.id || createId(),
+          name: customerName,
+          text: testimonialText,
+          image: image ? URL.createObjectURL(image) : currentTestimonial?.image || FALLBACK_IMAGE,
+          sortOrder: Number(form.get("sort_order") || 0),
+          active: form.get("active") === "on"
+        };
+
+        if (currentTestimonial) {
+          testimonials = testimonials.map((item) => (item.id === currentTestimonial.id ? testimonialPayload : item));
+        } else {
+          testimonials.unshift(testimonialPayload);
+        }
+      }
+
+      resetTestimonialForm();
+      await refreshTestimonials();
+    } catch (error) {
+      alert(`Não foi possível salvar o depoimento: ${error.message}`);
     }
   });
 }
@@ -1319,8 +1505,10 @@ function initImageFallbacks() {
 }
 
 async function init() {
+  mountPageTemplates();
   await initializeAuth();
   await loadVehicles();
+  await loadTestimonials();
   initNavigation();
   syncAdminAccess();
   renderHero();
@@ -1357,7 +1545,9 @@ async function init() {
 document.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
     console.error("Erro ao iniciar o site:", error);
+    mountPageTemplates();
     vehicles = [...seedVehicles];
+    testimonials = [...seedTestimonials];
     renderHero();
     renderFeaturedRail();
     renderTestimonials();

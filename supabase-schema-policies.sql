@@ -29,6 +29,30 @@ to authenticated
 using (true)
 with check (true);
 
+create table if not exists testimonials (
+  id uuid default gen_random_uuid() primary key,
+  customer_name text not null,
+  testimonial_text text not null,
+  image_url text,
+  sort_order integer default 0,
+  active boolean default true,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table testimonials enable row level security;
+
+drop policy if exists "Todos podem ler depoimentos" on testimonials;
+create policy "Todos podem ler depoimentos"
+on testimonials for select
+using (true);
+
+drop policy if exists "Autenticados podem gerenciar depoimentos" on testimonials;
+create policy "Autenticados podem gerenciar depoimentos"
+on testimonials for all
+to authenticated
+using (true)
+with check (true);
+
 -- Storage policies para bucket vehicle-photos.
 create policy "Public can read vehicle photos"
 on storage.objects for select
