@@ -154,6 +154,20 @@ img {
   box-shadow: 0 10px 22px rgba(231, 201, 95, 0.18);
 }
 
+.nav-admin-link {
+  align-items: center;
+  border: 1px solid rgba(231, 201, 95, 0.28);
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.nav-admin-link:hover {
+  border-color: rgba(231, 201, 95, 0.7);
+}
+
 .icon-button {
   align-items: center;
   background: #11100d;
@@ -169,6 +183,7 @@ img {
 
 .icon-button svg,
 .button svg,
+.nav-admin-link svg,
 .nav-whatsapp svg,
 .floating-whatsapp svg,
 .contact-list svg,

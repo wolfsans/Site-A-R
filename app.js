@@ -706,6 +706,11 @@ function syncAdminAccess() {
   if (stockLogoutButton) {
     stockLogoutButton.hidden = !logged;
   }
+
+  const navAdminLink = qs("#navAdminLink");
+  if (navAdminLink) {
+    navAdminLink.hidden = !logged;
+  }
 }
 
 function setLoginMessage(message, type = "error") {
