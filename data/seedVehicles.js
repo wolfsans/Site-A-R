@@ -1,3 +1,20 @@
+const fordKaImages = [
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-01.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-08.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-09.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-11.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-12.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-13.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-02.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-10.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-14.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-04.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-05.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-03.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-06.jpeg", import.meta.url).href,
+  new URL("../assets/vehicles/ford-ka-2022/ford-ka-2022-07.jpeg", import.meta.url).href
+];
+
 export const seedVehicles = [
   {
     id: "seed-ford-ka-2022",
@@ -12,22 +29,7 @@ export const seedVehicles = [
     sold: false,
     description:
       "Ford Ka Sedan 1.5 2022, câmbio automático, 70 mil km, cor branca, interior em couro, multimídia, rodas de liga, faróis de neblina e excelente apresentação.",
-    images: [
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-01.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-08.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-09.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-11.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-12.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-13.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-02.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-10.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-14.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-04.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-05.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-03.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-06.jpeg",
-      "assets/vehicles/ford-ka-2022/ford-ka-2022-07.jpeg"
-    ]
+    images: fordKaImages
   },
   {
     id: "seed-corolla-xei",

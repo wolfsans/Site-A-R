@@ -6,11 +6,13 @@ import detailsPage from "./pages/details.html?raw";
 import aboutPage from "./pages/about.html?raw";
 import contactPage from "./pages/contact.html?raw";
 import adminPage from "./pages/admin.html?raw";
+import logoTransparentUrl from "./assets/brand/aer-logo-transparent.png";
+import storeFacadeUrl from "./assets/store/fachada-noite-limpa.jpg";
 
 const WHATSAPP_URL = "https://wa.me/5549999487011";
-const FALLBACK_IMAGE = "assets/brand/aer-logo-transparent.png";
+const FALLBACK_IMAGE = logoTransparentUrl;
 const PAGE_SIZE = 6;
-const PAGE_TEMPLATES = [homePage, stockPage, detailsPage, aboutPage, contactPage, adminPage];
+const PAGE_TEMPLATES = [homePage, stockPage, detailsPage, aboutPage, contactPage, adminPage].map(resolveTemplateAssets);
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const STORAGE_BUCKET = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || "vehicle-photos";
@@ -191,6 +193,12 @@ function qs(selector, scope = document) {
 
 function qsa(selector, scope = document) {
   return [...scope.querySelectorAll(selector)];
+}
+
+function resolveTemplateAssets(html) {
+  return html
+    .replaceAll("assets/store/fachada-noite-limpa.jpg", storeFacadeUrl)
+    .replaceAll("assets/brand/aer-logo-transparent.png", logoTransparentUrl);
 }
 
 function mountPageTemplates() {
