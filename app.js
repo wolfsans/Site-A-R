@@ -14,6 +14,7 @@ const PAGE_TEMPLATES = [homePage, stockPage, detailsPage, aboutPage, contactPage
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const STORAGE_BUCKET = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || "vehicle-photos";
+const TESTIMONIALS_STORAGE_BUCKET = import.meta.env.VITE_SUPABASE_TESTIMONIALS_BUCKET || "testimonials-photo";
 const supabase =
   SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes("SEU-PROJETO")
     ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -363,7 +364,7 @@ function moveFeatured(direction) {
   renderFeaturedRail();
 }
 
-function vehicleCard(vehicle, showDescription = true) {
+function vehicleCard(vehicle, showDescription = false) {
   return `
     <article class="vehicle-card reveal" data-card-id="${vehicle.id}" data-image-index="0">
       <div class="card-media">
@@ -621,7 +622,7 @@ function renderInventory() {
 
   qs("#vehicleCount").textContent = `${filtered.length} ${filtered.length === 1 ? "veículo" : "veículos"}`;
   qs("#vehicleGrid").innerHTML = pageItems.length
-    ? pageItems.map((vehicle) => vehicleCard(vehicle)).join("")
+    ? pageItems.map((vehicle) => vehicleCard(vehicle, false)).join("")
     : `<div class="empty-state">Nenhum veículo encontrado com os filtros selecionados.</div>`;
 
   qs("#pagination").innerHTML =
@@ -1069,14 +1070,14 @@ async function uploadTestimonialImage(blob, testimonialId) {
   if (!supabase || !blob) return "";
 
   const filePath = `testimonials/${testimonialId}/${Date.now()}.jpg`;
-  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filePath, blob, {
+  const { error } = await supabase.storage.from(TESTIMONIALS_STORAGE_BUCKET).upload(filePath, blob, {
     contentType: "image/jpeg",
     upsert: true
   });
 
   if (error) throw error;
 
-  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+  const { data } = supabase.storage.from(TESTIMONIALS_STORAGE_BUCKET).getPublicUrl(filePath);
   return data?.publicUrl || "";
 }
 

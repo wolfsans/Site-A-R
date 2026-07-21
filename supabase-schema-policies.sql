@@ -73,3 +73,28 @@ create policy "Authenticated can delete vehicle photos"
 on storage.objects for delete
 to authenticated
 using (bucket_id = 'vehicle-photos');
+
+-- Storage policies para bucket testimonials-photo.
+drop policy if exists "Public can read testimonial photos" on storage.objects;
+create policy "Public can read testimonial photos"
+on storage.objects for select
+using (bucket_id = 'testimonials-photo');
+
+drop policy if exists "Authenticated can upload testimonial photos" on storage.objects;
+create policy "Authenticated can upload testimonial photos"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'testimonials-photo');
+
+drop policy if exists "Authenticated can update testimonial photos" on storage.objects;
+create policy "Authenticated can update testimonial photos"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'testimonials-photo')
+with check (bucket_id = 'testimonials-photo');
+
+drop policy if exists "Authenticated can delete testimonial photos" on storage.objects;
+create policy "Authenticated can delete testimonial photos"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'testimonials-photo');
