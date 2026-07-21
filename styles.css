@@ -872,6 +872,15 @@ textarea:focus {
   padding: 0;
 }
 
+.contact-info h3 {
+  color: var(--gold);
+  margin: 24px 0 0;
+}
+
+.seller-contact-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .contact-list li,
 .footer-social {
   align-items: center;
@@ -1598,6 +1607,10 @@ textarea {
 
   .contact-layout {
     display: grid;
+  }
+
+  .seller-contact-list {
+    grid-template-columns: 1fr;
   }
 }
 

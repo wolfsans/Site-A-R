@@ -9,7 +9,7 @@ import adminPage from "./pages/admin.html?raw";
 import logoTransparentUrl from "./assets/brand/aer-logo-transparent.png";
 import storeFacadeUrl from "./assets/store/fachada-noite-limpa.jpg";
 
-const WHATSAPP_URL = "https://wa.me/5549999487011";
+const WHATSAPP_URL = "https://wa.me/554991066312";
 const FALLBACK_IMAGE = logoTransparentUrl;
 const PAGE_SIZE = 6;
 const MAX_FEATURED_VEHICLES = 5;
@@ -24,19 +24,59 @@ const supabase =
     : null;
 const WHATSAPP_ATTENDANTS = [
   {
-    id: "alan",
-    name: "Alan",
-    role: "Atendimento e consulta de veículos",
-    phone: "5549999487011",
-    displayPhone: "(49) 99948-7011",
+    id: "anderson-morais",
+    name: "Anderson Morais",
+    role: "Vendedor",
+    phone: "554991066312",
+    displayPhone: "+55 49 9106-6312",
     icon: "user-round"
   },
   {
-    id: "joao",
-    name: "João",
-    role: "Atendimento comercial",
-    phone: "5549920029932",
-    displayPhone: "(49) 92002-9932",
+    id: "anderson-ecco",
+    name: "Anderson Ecco",
+    role: "Vendedor",
+    phone: "554999093071",
+    displayPhone: "+55 49 9909-3071",
+    icon: "user-round"
+  },
+  {
+    id: "julio",
+    name: "Julio",
+    role: "Vendedor",
+    phone: "555581371777",
+    displayPhone: "+55 55 8137-1777",
+    icon: "user-round"
+  },
+  {
+    id: "alexandre",
+    name: "Alexandre",
+    role: "Vendedor",
+    phone: "554999136936",
+    displayPhone: "+55 49 9913-6936",
+    icon: "user-round"
+  },
+  {
+    id: "mateus",
+    name: "Mateus",
+    role: "Vendedor",
+    phone: "554998065877",
+    displayPhone: "+55 49 9806-5877",
+    icon: "user-round"
+  },
+  {
+    id: "brito",
+    name: "Brito",
+    role: "Vendedor",
+    phone: "554998252629",
+    displayPhone: "+55 49 9825-2629",
+    icon: "user-round"
+  },
+  {
+    id: "emanuel",
+    name: "Emanuel",
+    role: "Vendedor",
+    phone: "554998278479",
+    displayPhone: "+55 49 9827-8479",
     icon: "user-round"
   }
 ];
@@ -405,7 +445,7 @@ function vehicleCard(vehicle, showDescription = false) {
         <strong class="price">${formatPrice(vehicle.price)}</strong>
         <div class="card-actions">
           <a class="button button-outline" href="#detalhes?id=${vehicle.id}">Ver detalhes</a>
-          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha Alan ou João para verificar disponibilidade, negociação e detalhes deste veículo.">
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha um vendedor para verificar disponibilidade, negociação e detalhes deste veículo.">
             <i data-lucide="message-circle"></i>
             Consultar
           </a>
@@ -483,7 +523,7 @@ function renderVehicleDetails() {
         </div>
         <p>${vehicle.description || "Entre em contato para mais informações sobre este veículo."}</p>
         <div class="details-actions">
-          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha Alan ou João para falar sobre este veículo.">
+          <a class="button button-whatsapp js-whatsapp-select" href="${WHATSAPP_URL}" data-message="${vehicleWhatsAppMessage(vehicle)}" data-whatsapp-title="Consultar ${vehicle.title}" data-whatsapp-subtitle="Escolha um vendedor para falar sobre este veículo.">
             <i data-lucide="message-circle"></i>
             Consultar atendente
           </a>
@@ -1426,6 +1466,29 @@ function initContactForm() {
   });
 }
 
+function renderContactSellers() {
+  const list = qs("#contactSellerList");
+  if (!list) return;
+
+  list.innerHTML = WHATSAPP_ATTENDANTS.map(
+    (attendant) => `
+      <li>
+        <i data-lucide="phone-call"></i>
+        <a
+          class="js-whatsapp-select"
+          href="${whatsappLink(attendant.phone, "Olá, gostaria de falar com a A&R Automóveis.")}"
+          data-message="Olá, gostaria de falar com a A&R Automóveis."
+          data-whatsapp-title="Falar com ${attendant.name}"
+          data-whatsapp-subtitle="Telefone e WhatsApp: ${attendant.displayPhone}"
+          data-preferred-attendant="${attendant.id}"
+        >
+          ${attendant.name} - ${attendant.displayPhone}
+        </a>
+      </li>
+    `
+  ).join("");
+}
+
 function openWhatsAppPanel(options = {}) {
   const config = typeof options === "string" ? { message: options } : options;
   const panel = qs("#whatsappPanel");
@@ -1575,6 +1638,7 @@ async function init() {
   initFilters();
   initAdmin();
   initContactForm();
+  renderContactSellers();
   initWhatsAppPanel();
   initImageFallbacks();
   observeRevealElements();
