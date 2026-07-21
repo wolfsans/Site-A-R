@@ -2039,6 +2039,8 @@ textarea:focus {
   align-items: end;
   display: grid;
   inset: 0;
+  min-height: 100dvh;
+  overflow: hidden;
   padding: 22px;
   position: fixed;
   z-index: 60;
@@ -2059,8 +2061,12 @@ textarea:focus {
   border-radius: 8px;
   box-shadow: 0 26px 80px rgba(0, 0, 0, 0.58);
   color: #f3d66b;
+  display: flex;
+  flex-direction: column;
   justify-self: end;
+  max-height: calc(100dvh - 44px);
   max-width: 420px;
+  overflow: hidden;
   padding: 24px;
   position: relative;
   width: min(100%, 420px);
@@ -2087,6 +2093,27 @@ textarea:focus {
 .attendant-list {
   display: grid;
   gap: 10px;
+  max-height: min(58dvh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-color: rgba(231, 201, 95, 0.8) rgba(17, 16, 13, 0.9);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.attendant-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.attendant-list::-webkit-scrollbar-track {
+  background: rgba(17, 16, 13, 0.9);
+  border-radius: 999px;
+}
+
+.attendant-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #f3d66b, #b9891f);
+  border-radius: 999px;
 }
 
 .attendant-option {
@@ -2149,12 +2176,18 @@ textarea:focus {
 @media (max-width: 620px) {
   .whatsapp-panel {
     align-items: end;
-    padding: 12px;
+    padding: 10px;
   }
 
   .whatsapp-card {
     justify-self: stretch;
+    max-height: calc(100dvh - 20px);
     max-width: none;
+    padding: 20px;
+  }
+
+  .attendant-list {
+    max-height: 54dvh;
   }
 }
 
