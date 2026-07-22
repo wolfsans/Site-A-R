@@ -2,8 +2,8 @@
   <section class="page-hero stock-hero">
     <div>
       <span class="eyebrow light">Estoque</span>
-      <h1>Escolha seu proximo veiculo</h1>
-      <p>Use os filtros para encontrar carros por marca, ano, cambio, preco e quilometragem.</p>
+      <h1>Escolha seu próximo veículo</h1>
+      <p>Use os filtros para encontrar carros por marca, ano, câmbio, preço e quilometragem.</p>
     </div>
   </section>
 
@@ -27,31 +27,31 @@
           <input id="filterYearMin" type="number" min="1990" max="2030" placeholder="2018" />
         </label>
         <label>
-          ate
+          até
           <input id="filterYearMax" type="number" min="1990" max="2030" placeholder="2026" />
         </label>
       </div>
       <div class="split-fields">
         <label>
-          Preco de
+          Preço de
           <input id="filterPriceMin" type="number" min="0" step="1000" placeholder="50000" />
         </label>
         <label>
-          ate
+          até
           <input id="filterPriceMax" type="number" min="0" step="1000" placeholder="150000" />
         </label>
       </div>
       <label>
-        Cambio
+        Câmbio
         <select id="filterTransmission">
           <option value="">Todos</option>
           <option value="Manual">Manual</option>
-          <option value="Automatico">Automatico</option>
+          <option value="Automatico">Automático</option>
           <option value="Automático">Automático</option>
         </select>
       </label>
       <label>
-        Combustivel
+        Combustível
         <select id="filterFuel"></select>
       </label>
       <div class="split-fields">
@@ -60,7 +60,7 @@
           <input id="filterKmMin" type="number" min="0" step="1000" placeholder="0" />
         </label>
         <label>
-          ate
+          até
           <input id="filterKmMax" type="number" min="0" step="1000" placeholder="90000" />
         </label>
       </div>
@@ -73,7 +73,7 @@
     <div class="inventory-content">
       <div class="inventory-toolbar">
         <div>
-          <span id="vehicleCount">0 veiculos</span>
+          <span id="vehicleCount">0 veículos</span>
           <small>Estoque atualizado</small>
         </div>
         <label class="sort-control">
@@ -89,7 +89,7 @@
         <div class="inventory-admin-actions">
           <a class="button button-dark" href="#admin" id="stockAdminButton" hidden>
             <i data-lucide="plus"></i>
-            Adicionar veiculo
+            Adicionar veículo
           </a>
           <button class="button button-outline" type="button" id="stockLogoutButton" hidden>
             <i data-lucide="log-out"></i>

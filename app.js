@@ -9,7 +9,7 @@ import adminPage from "./pages/admin.html?raw";
 import logoTransparentUrl from "./assets/brand/aer-logo-transparent.png";
 import storeFacadeUrl from "./assets/store/fachada-noite-limpa.jpg";
 
-const WHATSAPP_URL = "https://wa.me/554999487011";
+const WHATSAPP_URL = "https://wa.me/554999136936";
 const FALLBACK_IMAGE = logoTransparentUrl;
 const PAGE_SIZE = 6;
 const MAX_FEATURED_VEHICLES = 5;
@@ -23,14 +23,6 @@ const supabase =
     ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
 const WHATSAPP_ATTENDANTS = [
-  {
-    id: "alan",
-    name: "Alan",
-    role: "Vendedor",
-    phone: "554999487011",
-    displayPhone: "+55 49 9948-7011",
-    icon: "user-round"
-  },
   {
     id: "alexandre",
     name: "Alexandre",
@@ -81,7 +73,7 @@ const WHATSAPP_ATTENDANTS = [
   },
   {
     id: "joao",
-    name: "Joao",
+    name: "João",
     role: "Vendedor",
     phone: "5549920029932",
     displayPhone: "+55 49 92002-9932",

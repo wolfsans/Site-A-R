@@ -2,8 +2,8 @@
   <section class="admin-shell">
     <div class="admin-intro">
       <span class="eyebrow">Admin</span>
-      <h1>Gerenciar conteudo</h1>
-      <p>Acesse com seu usuario administrativo para controlar veiculos, depoimentos e fotos de venda.</p>
+      <h1>Gerenciar conteúdo</h1>
+      <p>Acesse com seu usuário administrativo para controlar veículos, depoimentos e fotos de venda.</p>
     </div>
 
     <section class="login-panel" id="loginPanel">
@@ -35,15 +35,15 @@
         </div>
       </div>
 
-      <div class="admin-tabs" role="tablist" aria-label="Areas administrativas">
-        <button class="is-active" type="button" data-admin-tab="vehicles">Veiculos</button>
+      <div class="admin-tabs" role="tablist" aria-label="Áreas administrativas">
+        <button class="is-active" type="button" data-admin-tab="vehicles">Veículos</button>
         <button type="button" data-admin-tab="testimonials">Depoimentos</button>
       </div>
 
       <div class="admin-tab-panel is-active" id="adminVehiclesPanel" data-admin-panel="vehicles">
         <div class="admin-section-head">
-          <h3 id="adminFormTitle">Novo veiculo</h3>
-          <button class="text-button" type="button" id="cancelEdit" hidden>Cancelar edicao</button>
+          <h3 id="adminFormTitle">Novo veículo</h3>
+          <button class="text-button" type="button" id="cancelEdit" hidden>Cancelar edição</button>
         </div>
 
         <form class="vehicle-form admin-form-grid" id="vehicleForm">
@@ -64,41 +64,41 @@
             <input name="km" type="number" min="0" step="100" placeholder="45000" required />
           </label>
           <label class="field-span-3">
-            Cambio
+            Câmbio
             <select name="transmission" required>
-              <option value="Automático">Automatico</option>
+              <option value="Automático">Automático</option>
               <option value="Manual">Manual</option>
             </select>
           </label>
           <label class="field-span-3">
-            Combustivel
+            Combustível
             <input name="fuel" type="text" placeholder="Flex" required />
           </label>
           <label class="field-span-3">
-            Preco
+            Preço
             <input name="price" type="number" min="0" step="100" placeholder="89900" required />
             <small>Use 0 para exibir "Sob consulta".</small>
           </label>
           <div class="field-span-6 photo-upload-field">
-            <span class="form-label">Fotos do veiculo</span>
+            <span class="form-label">Fotos do veículo</span>
             <label class="upload-box" for="vehiclePhotos">
               <i data-lucide="image-plus"></i>
               <strong>Escolher fotos do computador</strong>
-              <small>Selecione uma ou mais imagens do veiculo.</small>
+              <small>Selecione uma ou mais imagens do veículo.</small>
               <input id="vehiclePhotos" name="photoFiles" type="file" accept="image/*" multiple />
             </label>
             <div class="photo-preview" id="photoPreview" aria-live="polite"></div>
             <small>Ao editar, escolha novas fotos apenas se quiser substituir as imagens atuais.</small>
           </div>
           <details class="field-span-6 optional-urls">
-            <summary>Adicionar fotos por URL, se necessario</summary>
+            <summary>Adicionar fotos por URL, se necessário</summary>
             <label>
               URLs das fotos
               <textarea name="images" rows="4" placeholder="Opcional: uma URL por linha"></textarea>
             </label>
           </details>
           <label class="field-span-6">
-            Observacoes
+            Observações
             <textarea name="description" rows="3" placeholder="Resumo, opcionais e estado geral"></textarea>
           </label>
           <div class="form-actions field-span-12">
@@ -115,7 +115,7 @@
       <div class="admin-tab-panel" id="adminTestimonialsPanel" data-admin-panel="testimonials">
         <div class="admin-section-head">
           <h3 id="testimonialFormTitle">Novo depoimento</h3>
-          <button class="text-button" type="button" id="cancelTestimonialEdit" hidden>Cancelar edicao</button>
+          <button class="text-button" type="button" id="cancelTestimonialEdit" hidden>Cancelar edição</button>
         </div>
 
         <form class="testimonial-form admin-form-grid" id="testimonialForm">
@@ -136,7 +136,7 @@
             <label class="upload-box" for="testimonialPhoto">
               <i data-lucide="image-plus"></i>
               <strong>Escolher 1 foto</strong>
-              <small>Use uma imagem da venda, entrega do veiculo ou cliente.</small>
+              <small>Use uma imagem da venda, entrega do veículo ou cliente.</small>
               <input id="testimonialPhoto" name="testimonialPhoto" type="file" accept="image/*" />
             </label>
             <div class="photo-preview single-preview" id="testimonialPhotoPreview" aria-live="polite"></div>
