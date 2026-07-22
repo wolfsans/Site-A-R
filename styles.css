@@ -710,6 +710,26 @@ main {
   justify-content: flex-end;
 }
 
+.sort-control {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.sort-control span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.sort-control select {
+  min-height: 40px;
+  min-width: 188px;
+  width: auto;
+}
+
 .filter-title h2,
 .inventory-toolbar span,
 .contact-info h2,
@@ -772,6 +792,7 @@ textarea:focus {
 }
 
 .inventory-toolbar {
+  flex-wrap: wrap;
   margin-bottom: 18px;
 }
 
@@ -1612,6 +1633,12 @@ textarea {
   .seller-contact-list {
     grid-template-columns: 1fr;
   }
+
+  .sort-control {
+    justify-content: space-between;
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 620px) {
@@ -1652,6 +1679,17 @@ textarea {
 
   .hero-content h1 {
     font-size: 3rem;
+  }
+
+  .inventory-toolbar,
+  .sort-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sort-control select {
+    min-width: 0;
+    width: 100%;
   }
 
   .hero-dots {

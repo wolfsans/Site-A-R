@@ -76,6 +76,16 @@
           <span id="vehicleCount">0 veiculos</span>
           <small>Estoque atualizado</small>
         </div>
+        <label class="sort-control">
+          <span>Ordenar por:</span>
+          <select id="sortVehicles">
+            <option value="relevance">Mais relevantes</option>
+            <option value="price-desc">Maior preço</option>
+            <option value="price-asc">Menor preço</option>
+            <option value="year-desc">Ano mais novo</option>
+            <option value="km-asc">Menor Km</option>
+          </select>
+        </label>
         <div class="inventory-admin-actions">
           <a class="button button-dark" href="#admin" id="stockAdminButton" hidden>
             <i data-lucide="plus"></i>

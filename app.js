@@ -9,7 +9,7 @@ import adminPage from "./pages/admin.html?raw";
 import logoTransparentUrl from "./assets/brand/aer-logo-transparent.png";
 import storeFacadeUrl from "./assets/store/fachada-noite-limpa.jpg";
 
-const WHATSAPP_URL = "https://wa.me/554991066312";
+const WHATSAPP_URL = "https://wa.me/554999487011";
 const FALLBACK_IMAGE = logoTransparentUrl;
 const PAGE_SIZE = 6;
 const MAX_FEATURED_VEHICLES = 5;
@@ -24,27 +24,11 @@ const supabase =
     : null;
 const WHATSAPP_ATTENDANTS = [
   {
-    id: "anderson-morais",
-    name: "Anderson Morais",
+    id: "alan",
+    name: "Alan",
     role: "Vendedor",
-    phone: "554991066312",
-    displayPhone: "+55 49 9106-6312",
-    icon: "user-round"
-  },
-  {
-    id: "anderson-ecco",
-    name: "Anderson Ecco",
-    role: "Vendedor",
-    phone: "554999093071",
-    displayPhone: "+55 49 9909-3071",
-    icon: "user-round"
-  },
-  {
-    id: "julio",
-    name: "Julio",
-    role: "Vendedor",
-    phone: "555581371777",
-    displayPhone: "+55 55 8137-1777",
+    phone: "554999487011",
+    displayPhone: "+55 49 9948-7011",
     icon: "user-round"
   },
   {
@@ -56,11 +40,19 @@ const WHATSAPP_ATTENDANTS = [
     icon: "user-round"
   },
   {
-    id: "mateus",
-    name: "Mateus",
+    id: "anderson-ecco",
+    name: "Anderson Ecco",
     role: "Vendedor",
-    phone: "554998065877",
-    displayPhone: "+55 49 9806-5877",
+    phone: "554999093071",
+    displayPhone: "+55 49 9909-3071",
+    icon: "user-round"
+  },
+  {
+    id: "anderson-morais",
+    name: "Anderson Morais",
+    role: "Vendedor",
+    phone: "554991066312",
+    displayPhone: "+55 49 9106-6312",
     icon: "user-round"
   },
   {
@@ -72,11 +64,43 @@ const WHATSAPP_ATTENDANTS = [
     icon: "user-round"
   },
   {
+    id: "ederson",
+    name: "Ederson",
+    role: "Vendedor",
+    phone: "554999514982",
+    displayPhone: "+55 49 9951-4982",
+    icon: "user-round"
+  },
+  {
     id: "emanuel",
     name: "Emanuel",
     role: "Vendedor",
     phone: "554998278479",
     displayPhone: "+55 49 9827-8479",
+    icon: "user-round"
+  },
+  {
+    id: "joao",
+    name: "Joao",
+    role: "Vendedor",
+    phone: "5549920029932",
+    displayPhone: "+55 49 92002-9932",
+    icon: "user-round"
+  },
+  {
+    id: "julio",
+    name: "Julio",
+    role: "Vendedor",
+    phone: "555581371777",
+    displayPhone: "+55 55 8137-1777",
+    icon: "user-round"
+  },
+  {
+    id: "mateus",
+    name: "Mateus",
+    role: "Vendedor",
+    phone: "554998065877",
+    displayPhone: "+55 49 9806-5877",
     icon: "user-round"
   }
 ];
@@ -263,6 +287,40 @@ function getMainYear(year) {
   return match ? Number(match[0]) : 0;
 }
 
+function getSortablePrice(vehicle) {
+  const price = Number(vehicle.price || 0);
+  return price > 0 ? price : Number.POSITIVE_INFINITY;
+}
+
+function sortVehiclesBy(items, sortMode) {
+  const sorted = [...items];
+
+  if (sortMode === "price-desc") {
+    return sorted.sort((current, next) => {
+      const currentPrice = Number(current.price || 0);
+      const nextPrice = Number(next.price || 0);
+      if (!currentPrice && !nextPrice) return 0;
+      if (!currentPrice) return 1;
+      if (!nextPrice) return -1;
+      return nextPrice - currentPrice;
+    });
+  }
+
+  if (sortMode === "price-asc") {
+    return sorted.sort((current, next) => getSortablePrice(current) - getSortablePrice(next));
+  }
+
+  if (sortMode === "year-desc") {
+    return sorted.sort((current, next) => getMainYear(next.year) - getMainYear(current.year));
+  }
+
+  if (sortMode === "km-asc") {
+    return sorted.sort((current, next) => Number(current.km || 0) - Number(next.km || 0));
+  }
+
+  return sorted;
+}
+
 function vehicleWhatsAppMessage(vehicle) {
   return `Olá, tenho interesse no veículo ${vehicle.title} ${vehicle.year}.`;
 }
@@ -386,11 +444,14 @@ function startHeroTimer() {
 
 function renderFeaturedRail() {
   const rail = qs("#featuredRail");
-  const latestVehicles = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8);
+  const highestPriceVehicles = sortVehiclesBy(
+    vehicles.filter((vehicle) => !vehicle.sold),
+    "price-desc"
+  ).slice(0, 8);
   const perPage = getFeaturedPerPage();
-  const totalPages = Math.max(1, Math.ceil(latestVehicles.length / perPage));
+  const totalPages = Math.max(1, Math.ceil(highestPriceVehicles.length / perPage));
   featuredPage = Math.min(featuredPage, totalPages - 1);
-  const pageItems = latestVehicles.slice(featuredPage * perPage, featuredPage * perPage + perPage);
+  const pageItems = highestPriceVehicles.slice(featuredPage * perPage, featuredPage * perPage + perPage);
 
   rail.innerHTML = pageItems.map((vehicle) => vehicleCard(vehicle, false)).join("");
   qs("#featuredPrev").disabled = featuredPage === 0;
@@ -407,8 +468,8 @@ function getFeaturedPerPage() {
 }
 
 function moveFeatured(direction) {
-  const latestCount = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8).length;
-  const totalPages = Math.max(1, Math.ceil(latestCount / getFeaturedPerPage()));
+  const highestPriceCount = vehicles.filter((vehicle) => !vehicle.sold).slice(0, 8).length;
+  const totalPages = Math.max(1, Math.ceil(highestPriceCount / getFeaturedPerPage()));
   featuredPage = Math.min(Math.max(featuredPage + direction, 0), totalPages - 1);
   renderFeaturedRail();
 }
@@ -663,7 +724,8 @@ function getFilteredVehicles() {
 
 function renderInventory() {
   renderFilterOptions();
-  const filtered = getFilteredVehicles();
+  const sortMode = qs("#sortVehicles")?.value || "relevance";
+  const filtered = sortVehiclesBy(getFilteredVehicles(), sortMode);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   currentPage = Math.min(currentPage, totalPages);
   const start = (currentPage - 1) * PAGE_SIZE;
@@ -726,6 +788,11 @@ function initFilters() {
     filterIds.forEach((id) => {
       qs(`#${id}`).value = "";
     });
+    currentPage = 1;
+    renderInventory();
+  });
+
+  qs("#sortVehicles")?.addEventListener("change", () => {
     currentPage = 1;
     renderInventory();
   });
